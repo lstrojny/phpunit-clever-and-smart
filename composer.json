@@ -1,0 +1,22 @@
+{
+    "name": "lstrojny/phpunit-clever-and-smart",
+    "description": "A clever test runner for PHPUnit",
+    "license": "MIT",
+    "require": {
+        "phpunit/phpunit": "3.*"
+    },
+    "require-dev": {
+        "symfony/process": "2.*"
+    },
+    "authors": [
+        {
+            "name": "Lars Strojny",
+            "email": "lars@strojny.net"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "PHPUnit\\Runner\\CleverAndSmart": "src/"
+        }
+    }
+}

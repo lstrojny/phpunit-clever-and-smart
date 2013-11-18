@@ -1,0 +1,5 @@
+/vendor/
+/tests/PHPUnit/Tests/Runner/CleverAndSmart/Integration/result-failure.xml
+/tests/PHPUnit/Tests/Runner/CleverAndSmart/Integration/result-success.xml
+/tests/PHPUnit/Tests/Runner/CleverAndSmart/Integration/result-retry.xml
+/tests/PHPUnit/Tests/Runner/CleverAndSmart/Integration/.phpunit-cas.db
