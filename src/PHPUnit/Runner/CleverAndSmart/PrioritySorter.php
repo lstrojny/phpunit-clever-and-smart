@@ -33,12 +33,6 @@ class PrioritySorter
         $tests = $suite->tests();
         $queue = $this->createQueue($tests);
 
-        /** @var $test TestCase */
-        var_dump(__METHOD__);
-        foreach ($tests as $test) {
-            var_dump(get_class($test) . '::' . $test->getName());
-        }
-
         $reordered = false;
         foreach ($tests as $position => $test) {
             if ($this->sortTest($test, $position, $queue)) {
@@ -54,12 +48,13 @@ class PrioritySorter
             $orderedGroup = $this->createQueue($group);
             foreach ($group as $position => $test) {
                 if ($this->sortTest($test, $position, $orderedGroup)) {
-                    $reorderedGroups = $reorderedGroup = true;
+                    $reorderedGroup = true;
                 }
             }
 
             if ($reorderedGroup) {
                 $groups[$groupName] = iterator_to_array($orderedGroup);
+                $reorderedGroups = true;
             }
         }
 
