@@ -15,10 +15,9 @@ It’s by no means meant for "production".
 To play around with it, add this to your `phpunit.xml(.dist)`
 ```
     <listeners>
-        <listener
-            class="PHPUnit\Runner\CleverAndSmart\TestListener"
-            file="src/PHPUnit/Runner/CleverAndSmart/TestListener.php">
+        <listener class="PHPUnit\Runner\CleverAndSmart\TestListener">
             <arguments>
+                <object class="PHPUnit\Runner\CleverAndSmart\Storage\Sqlite3Storage"/>
             </arguments>
         </listener>
     </listeners>

@@ -1,6 +1,7 @@
 <?php
 namespace PHPUnit\Runner\CleverAndSmart;
 
+use PHPUnit\Runner\CleverAndSmart\Storage\StorageInterface;
 use PHPUnit_Framework_TestListener as TestListenerInterface;
 use PHPUnit_Framework_Test as Test;
 use PHPUnit_Framework_TestCase as TestCase;
@@ -14,16 +15,16 @@ class TestListener implements TestListenerInterface
     /** @var Run */
     private $run;
 
-    /** @var Storage */
+    /** @var StorageInterface */
     private $storage;
 
     /** @var bool */
     private $reordered = false;
 
-    public function __construct()
+    public function __construct(StorageInterface $storage)
     {
+        $this->storage = $storage;
         $this->run = new Run();
-        $this->storage = new Storage();
     }
 
     public function addError(Test $test, Exception $e, $time)

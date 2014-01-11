@@ -1,12 +1,12 @@
 <?php
-namespace PHPUnit\Runner\CleverAndSmart;
+namespace PHPUnit\Runner\CleverAndSmart\Storage;
 
-use Exception;
-use PHPUnit_Framework_AssertionFailedError as AssertionFailedError;
 use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Runner\CleverAndSmart\Run;
+use Exception;
 use SQLite3;
 
-class Storage
+class Sqlite3Storage implements StorageInterface
 {
     const SCHEMA_VERSION = '0_1_0';
 
@@ -23,44 +23,56 @@ class Storage
         $this->db->busyTimeout(1000 * 30);
         $this->query('PRAGMA foreign_keys = ON');
 
-        $this->query('BEGIN');
-        $this->query(
-            'CREATE TABLE IF NOT EXISTS {{prefix}}run (
-                run_id CHAR(128) PRIMARY KEY,
-                run_ran_at DOUBLE
-            )'
+        $this->transactional(
+            function () {
+                $this->query(
+                    'CREATE TABLE IF NOT EXISTS {{prefix}}run (
+                        run_id CHAR(128) PRIMARY KEY,
+                        run_ran_at DOUBLE
+                    )'
+                );
+                $this->query(
+                    'CREATE TABLE IF NOT EXISTS {{prefix}}error (
+                        error_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        error_count INTEGER,
+                        error_class VARCHAR(1024),
+                        error_test VARCHAR(1024),
+                        UNIQUE (error_class, error_test) ON CONFLICT REPLACE
+                    )'
+                );
+                $this->query('CREATE INDEX IF NOT EXISTS {{prefix}}error_count_idx ON {{prefix}}error(error_count)');
+                $this->query(
+                    'CREATE TABLE IF NOT EXISTS {{prefix}}run_error (
+                        run_error_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        run_id CHAR(128),
+                        error_id INTEGER,
+                        UNIQUE (run_id, error_id),
+                        FOREIGN KEY (error_id) REFERENCES {{prefix}}error(error_id) ON DELETE CASCADE,
+                        FOREIGN KEY (error_id) REFERENCES {{prefix}}error(error_id)  ON DELETE CASCADE
+                    )'
+                );
+            }
         );
-        $this->query(
-            'CREATE TABLE IF NOT EXISTS {{prefix}}error (
-                error_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                error_count INTEGER,
-                error_class VARCHAR(1024),
-                error_test VARCHAR(1024),
-                UNIQUE (error_class, error_test) ON CONFLICT REPLACE
-            )'
+    }
+
+    public function recordSuccess(Run $run, TestCase $test)
+    {
+        $this->transactional(
+            function () use ($run, $test) {
+                $this->storeRun($run);
+                $this->updateErrorCount($test, false);
+            }
         );
-        $this->query(
-            'CREATE INDEX IF NOT EXISTS {{prefix}}error_count_idx ON {{prefix}}error(error_count)'
-        );
-        $this->query(
-            'CREATE TABLE IF NOT EXISTS {{prefix}}run_error (
-                run_error_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                run_id CHAR(128),
-                error_id INTEGER,
-                UNIQUE (run_id, error_id),
-                FOREIGN KEY (error_id) REFERENCES {{prefix}}error(error_id) ON DELETE CASCADE,
-                FOREIGN KEY (error_id) REFERENCES {{prefix}}error(error_id)  ON DELETE CASCADE
-            )'
-        );
-        $this->query('COMMIT');
     }
 
     public function recordError(Run $run, TestCase $test)
     {
-        $this->query('BEGIN');
-        $this->saveRun($run);
-        $this->insertError($run, $test);
-        $this->query('COMMIT');
+        $this->transactional(
+            function () use ($run, $test) {
+                $this->storeRun($run);
+                $this->insertError($run, $test);
+            }
+        );
     }
 
     public function getErrors()
@@ -72,12 +84,20 @@ class Storage
         );
     }
 
-    public function recordSuccess(Run $run, TestCase $test)
+    private function transactional(callable $callable)
     {
         $this->query('BEGIN');
-        $this->saveRun($run);
-        $this->updateErrorCount($test, false);
+
+        try {
+            $result = $callable();
+        } catch (Exception $e) {
+            $this->query('ROLLBACK');
+            throw $e;
+        }
+
         $this->query('COMMIT');
+
+        return $result;
     }
 
     private function insertError(Run $run, TestCase $test)
@@ -88,7 +108,7 @@ class Storage
             [get_class($test), $test->getName(), 0]
         );
         $errorId = $this->updateErrorCount($test, true);
-        $this->insertRelation($run, $errorId);
+        $this->storeRelation($run, $errorId);
     }
 
     private function updateErrorCount(TestCase $test, $increment)
@@ -105,20 +125,20 @@ class Storage
             [get_class($test), $test->getName()]
         );
 
-        $this->query('DELETE FROM {{prefix}}error WHERE error_count < -5');
+        $this->query('DELETE FROM {{prefix}}error WHERE error_count <= -4');
 
         return $errorId;
     }
 
-    private function insertRelation(Run $run, $errorId)
+    private function storeRelation(Run $run, $errorId)
     {
         $this->query(
-            "INSERT INTO {{prefix}}run_error (run_id, error_id) VALUES ('%s', %d)",
+            "INSERT OR IGNORE INTO {{prefix}}run_error (run_id, error_id) VALUES ('%s', %d)",
             [$run->getRunId(), $errorId]
         );
     }
 
-    private function saveRun(Run $run)
+    private function storeRun(Run $run)
     {
         $this->query(
             "INSERT OR IGNORE INTO {{prefix}}run (run_id, run_ran_at) VALUES ('%s', '%s')",
