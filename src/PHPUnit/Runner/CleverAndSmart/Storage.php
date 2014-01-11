@@ -20,6 +20,7 @@ class Storage
     public function __construct()
     {
         $this->db = new SQLite3('.phpunit-cas.db');
+        $this->db->busyTimeout(1000 * 30);
         $this->query('PRAGMA foreign_keys = ON');
 
         $this->query('BEGIN');
@@ -159,7 +160,7 @@ class Storage
         $result = $this->db->query($query);
 
         if ($this->db->lastErrorCode() !== 0) {
-            throw new Exception($this->db->lastErrorMsg());
+            throw new Exception($this->db->lastErrorMsg() . ' (error code ' . $this->db->lastErrorCode() . ')');
         }
 
         return $result;
