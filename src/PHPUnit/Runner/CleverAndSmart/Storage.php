@@ -75,7 +75,7 @@ class Storage
     {
         $this->query('BEGIN');
         $this->saveRun($run);
-        $this->updateErrorCount($test, '-');
+        $this->updateErrorCount($test, false);
         $this->query('COMMIT');
     }
 
@@ -86,22 +86,27 @@ class Storage
             VALUES ('%s', '%s', %d)",
             [get_class($test), $test->getName(), 0]
         );
-        $errorId = $this->updateErrorCount($test, '+');
+        $errorId = $this->updateErrorCount($test, true);
         $this->insertRelation($run, $errorId);
     }
 
-    private function updateErrorCount(TestCase $test, $operator)
+    private function updateErrorCount(TestCase $test, $increment)
     {
         $this->query(
             "UPDATE {{prefix}}error
             SET error_count = error_count %s 1
             WHERE error_class = '%s' AND error_test = '%s'",
-            [$operator, get_class($test), $test->getName()]
+            [($increment ? '+' : '-'), get_class($test), $test->getName()]
         );
-        $lastInsertId = $this->db->lastInsertRowID();
+
+        $errorId = $this->selectOne(
+            "SELECT error_id FROM {{prefix}}error WHERE error_class = '%s' AND error_test = '%s'",
+            [get_class($test), $test->getName()]
+        );
+
         $this->query('DELETE FROM {{prefix}}error WHERE error_count < -5');
 
-        return $lastInsertId;
+        return $errorId;
     }
 
     private function insertRelation(Run $run, $errorId)
@@ -130,7 +135,6 @@ class Storage
     private function select($query, array $params = [])
     {
         $query = $this->prepareQuery($query, $params);
-
         $result = $this->doQuery($query);
 
         $rows = [];
@@ -139,6 +143,15 @@ class Storage
         }
 
         return $rows;
+    }
+
+    private function selectOne($query, array $params)
+    {
+        $rows = $this->select($query, $params);
+
+        if ($rows) {
+            return current(current($rows));
+        }
     }
 
     private function doQuery($query)

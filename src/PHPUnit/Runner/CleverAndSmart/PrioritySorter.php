@@ -4,6 +4,7 @@ namespace PHPUnit\Runner\CleverAndSmart;
 use PHPUnit_Framework_TestCase as TestCase;
 use PHPUnit_Framework_TestSuite as TestSuite;
 use ReflectionObject;
+use SplQueue;
 
 class PrioritySorter
 {
@@ -14,42 +15,74 @@ class PrioritySorter
         $this->errors = $errors;
     }
 
-    public function sort(TestSuite $suite)
+    private function createQueue(array $values)
     {
-        $tests = $testsOrdered = $suite->tests();
+        $queue = new SplQueue();
+        array_map([$queue, 'push'], $values);
 
-        $reorderPosition = -1;
-        foreach ($tests as $position => $test) {
-            $this->sortTest($test, $position, $testsOrdered, $reorderPosition);
-        }
-
-        $groupReorderPosition = -1;
-        $groups = Util::getInvisibleProperty($suite, 'groups');
-        foreach ($groups as $groupName => $group) {
-            $orderedGroup = $group;
-            $groupReorderPosition = -1;
-            foreach ($group as $position => $test) {
-                $this->sortTest($test, $position, $orderedGroup, $groupReorderPosition);
-            }
-
-            if ($groupReorderPosition < -1) {
-                ksort($orderedGroup);
-                $groups[$groupName] = $orderedGroup;
-            }
-        }
-
-        if ($reorderPosition < -1 || $groupReorderPosition < -1) {
-            ksort($testsOrdered);
-
-            Util::setInvisibleProperty($suite, 'tests', $testsOrdered);
-            Util::setInvisibleProperty($suite, 'groups', $groups);
-        }
+        return $queue;
     }
 
-    private function sortTest($test, $position, array &$testsOrdered, &$reorderPosition)
+    public function sort(TestSuite $suite)
+    {
+        $this->sortTestSuite($suite);
+    }
+
+    private function sortTestSuite(TestSuite $suite)
+    {
+        $tests = $suite->tests();
+        $queue = $this->createQueue($tests);
+
+        /** @var $test TestCase */
+        var_dump(__METHOD__);
+        foreach ($tests as $test) {
+            var_dump(get_class($test) . '::' . $test->getName());
+        }
+
+        $reordered = false;
+        foreach ($tests as $position => $test) {
+            if ($this->sortTest($test, $position, $queue)) {
+                $reordered = true;
+            }
+        }
+
+        $groups = Util::getInvisibleProperty($suite, 'groups');
+        $reorderedGroups = false;
+        foreach ($groups as $groupName => $group) {
+
+            $reorderedGroup = false;
+            $orderedGroup = $this->createQueue($group);
+            foreach ($group as $position => $test) {
+                if ($this->sortTest($test, $position, $orderedGroup)) {
+                    $reorderedGroups = $reorderedGroup = true;
+                }
+            }
+
+            if ($reorderedGroup) {
+                $groups[$groupName] = iterator_to_array($orderedGroup);
+            }
+        }
+
+        if ($reordered) {
+            Util::setInvisibleProperty($suite, 'tests', iterator_to_array($queue));
+        }
+
+        if ($reorderedGroups) {
+            Util::setInvisibleProperty($suite, 'groups', $groups);
+        }
+
+        return $reordered || $reorderedGroups;
+    }
+
+    private function sortTest($test, $position, SplQueue $testsOrdered)
     {
         if ($test instanceof TestSuite) {
-            $this->sort($test);
+            if ($this->sortTestSuite($test)) {
+                unset($testsOrdered[$position]);
+                $testsOrdered->unshift($test);
+
+                return true;
+            }
 
             return false;
         }
@@ -57,7 +90,7 @@ class PrioritySorter
         if ($test instanceof TestCase && $this->isError($test)) {
 
             unset($testsOrdered[$position]);
-            $testsOrdered[$reorderPosition--] = $test;
+            $testsOrdered->unshift($test);
 
             return true;
         }

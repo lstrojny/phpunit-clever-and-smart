@@ -2,6 +2,7 @@
 namespace PHPUnit\Tests\Runner\CleverAndSmart\Integration;
 
 use PHPUnit_Framework_TestCase as TestCase;
+use SimpleXMLElement;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\ProcessBuilder;
 
@@ -25,60 +26,190 @@ class IntegrationTest extends TestCase
         }
     }
 
-    public function testSimpleCase()
+    public function testSimpleCase_FailuresOnly()
     {
         $this->runTests('SimpleTest', 'failure', 'failure', false);
         $this->runTests('SimpleTest', 'success', 'success', true);
         $this->runTests('SimpleTest', 'success', 'retry', true);
 
-        $this->assertEquals(3, $this->getIntegrationTestSuiteAttribute('failure', 'tests'));
-        $this->assertEquals(1, $this->getIntegrationTestSuiteAttribute('failure', 'failures'));
-        $this->assertEquals(0, $this->getIntegrationTestSuiteAttribute('failure', 'errors'));
-        $this->assertSame('testSuccess', $this->getIntegrationTestCaseAttribute('failure', 0, 'name'));
-        $this->assertSame('testFailure', $this->getIntegrationTestCaseAttribute('failure', 1, 'name'));
-        $this->assertSame('testError', $this->getIntegrationTestCaseAttribute('failure', 2, 'name'));
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 2);
+        $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
+        $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
+        $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 0);
+        $this->assertTestPosition('failure', 'SimpleTest::testSuccess', 1);
+        $this->assertTestPosition('failure', 'SimpleTest::testFailure', 2);
+        $this->assertTestPosition('failure', 'SimpleTest::testError', 3);
 
-        $this->assertEquals(3, $this->getIntegrationTestSuiteAttribute('success', 'tests'));
-        $this->assertEquals(0, $this->getIntegrationTestSuiteAttribute('success', 'failures'));
-        $this->assertEquals(0, $this->getIntegrationTestSuiteAttribute('success', 'errors'));
-        $this->assertSame('testFailure', $this->getIntegrationTestCaseAttribute('success', 0, 'name'));
-        $this->assertSame('testSuccess', $this->getIntegrationTestCaseAttribute('success', 1, 'name'));
-        $this->assertSame('testError', $this->getIntegrationTestCaseAttribute('success', 2, 'name'));
+        $this->assertTestSuitePosition('success', 'SimpleTest', 1);
+        $this->assertTestSuiteResult('success', 'SimpleTest', 'tests', 3);
+        $this->assertTestSuiteResult('success', 'SimpleTest', 'failures', 0);
+        $this->assertTestSuiteResult('success', 'SimpleTest', 'errors', 0);
+        $this->assertTestPosition('success', 'SimpleTest::testFailure', 1);
+        $this->assertTestPosition('success', 'SimpleTest::testSuccess', 2);
+        $this->assertTestPosition('success', 'SimpleTest::testError', 3);
 
-        $this->assertEquals(3, $this->getIntegrationTestSuiteAttribute('retry', 'tests'));
-        $this->assertEquals(0, $this->getIntegrationTestSuiteAttribute('retry', 'failures'));
-        $this->assertEquals(0, $this->getIntegrationTestSuiteAttribute('retry', 'errors'));
-        $this->assertSame('testFailure', $this->getIntegrationTestCaseAttribute('retry', 0, 'name'));
-        $this->assertSame('testSuccess', $this->getIntegrationTestCaseAttribute('retry', 1, 'name'));
-        $this->assertSame('testError', $this->getIntegrationTestCaseAttribute('retry', 2, 'name'));
+        $this->assertTestSuitePosition('retry', 'SimpleTest', 1);
+        $this->assertTestSuiteResult('retry', 'SimpleTest', 'tests', 3);
+        $this->assertTestSuiteResult('retry', 'SimpleTest', 'failures', 0);
+        $this->assertTestSuiteResult('retry', 'SimpleTest', 'errors', 0);
+        $this->assertTestPosition('retry', 'SimpleTest::testFailure', 1);
+        $this->assertTestPosition('retry', 'SimpleTest::testSuccess', 2);
+        $this->assertTestPosition('retry', 'SimpleTest::testError', 3);
     }
 
-    public function testSimpleCaseGrouped()
+    public function testSimpleCase_ErrorsOnly()
+    {
+        $this->runTests('SimpleTest', 'error', 'failure', false);
+        $this->runTests('SimpleTest', 'success', 'success', true);
+        $this->runTests('SimpleTest', 'success', 'retry', true);
+
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 2);
+        $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
+        $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 0);
+        $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
+        $this->assertTestPosition('failure', 'SimpleTest::testSuccess', 1);
+        $this->assertTestPosition('failure', 'SimpleTest::testFailure', 2);
+        $this->assertTestPosition('failure', 'SimpleTest::testError', 3);
+
+        $this->assertTestSuitePosition('success', 'SimpleTest', 1);
+        $this->assertTestSuiteResult('success', 'SimpleTest', 'tests', 3);
+        $this->assertTestSuiteResult('success', 'SimpleTest', 'failures', 0);
+        $this->assertTestSuiteResult('success', 'SimpleTest', 'errors', 0);
+        $this->assertTestPosition('success', 'SimpleTest::testError', 1);
+        $this->assertTestPosition('success', 'SimpleTest::testSuccess', 2);
+        $this->assertTestPosition('success', 'SimpleTest::testFailure', 3);
+
+        $this->assertTestSuitePosition('retry', 'SimpleTest', 1);
+        $this->assertTestSuiteResult('retry', 'SimpleTest', 'tests', 3);
+        $this->assertTestSuiteResult('retry', 'SimpleTest', 'failures', 0);
+        $this->assertTestSuiteResult('retry', 'SimpleTest', 'errors', 0);
+        $this->assertTestPosition('retry', 'SimpleTest::testError', 1);
+        $this->assertTestPosition('retry', 'SimpleTest::testSuccess', 2);
+        $this->assertTestPosition('retry', 'SimpleTest::testFailure', 3);
+    }
+
+    public function testSimpleCase_ErrorsAndFailures()
+    {
+        $this->runTests('SimpleTest', 'error-failure', 'failure', false);
+        $this->runTests('SimpleTest', 'success', 'success', true);
+        $this->runTests('SimpleTest', 'success', 'retry', true);
+
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 2);
+        $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
+        $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
+        $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
+        $this->assertTestPosition('failure', 'SimpleTest::testSuccess', 1);
+        $this->assertTestPosition('failure', 'SimpleTest::testFailure', 2);
+        $this->assertTestPosition('failure', 'SimpleTest::testError', 3);
+
+        $this->assertTestSuitePosition('success', 'SimpleTest', 1);
+        $this->assertTestSuiteResult('success', 'SimpleTest', 'tests', 3);
+        $this->assertTestSuiteResult('success', 'SimpleTest', 'failures', 0);
+        $this->assertTestSuiteResult('success', 'SimpleTest', 'errors', 0);
+        $this->assertTestPosition('success', 'SimpleTest::testFailure', 1);
+        $this->assertTestPosition('success', 'SimpleTest::testError', 2);
+        $this->assertTestPosition('success', 'SimpleTest::testSuccess', 3);
+
+        $this->assertTestSuitePosition('retry', 'SimpleTest', 1);
+        $this->assertTestSuiteResult('retry', 'SimpleTest', 'tests', 3);
+        $this->assertTestSuiteResult('retry', 'SimpleTest', 'failures', 0);
+        $this->assertTestSuiteResult('retry', 'SimpleTest', 'errors', 0);
+        $this->assertTestPosition('retry', 'SimpleTest::testFailure', 1);
+        $this->assertTestPosition('retry', 'SimpleTest::testError', 2);
+        $this->assertTestPosition('retry', 'SimpleTest::testSuccess', 3);
+    }
+
+    public function testSimpleCaseGrouped_FailuresOnly()
     {
         $this->runTests('SimpleTest', 'failure', 'failure', false, 'grp');
         $this->runTests('SimpleTest', 'success', 'success', true, 'grp');
         $this->runTests('SimpleTest', 'success', 'retry', true, 'grp');
 
-        $this->assertEquals(3, $this->getIntegrationTestSuiteAttribute('failure', 'tests'));
-        $this->assertEquals(1, $this->getIntegrationTestSuiteAttribute('failure', 'failures'));
-        $this->assertEquals(0, $this->getIntegrationTestSuiteAttribute('failure', 'errors'));
-        $this->assertSame('testSuccess', $this->getIntegrationTestCaseAttribute('failure', 0, 'name'));
-        $this->assertSame('testFailure', $this->getIntegrationTestCaseAttribute('failure', 1, 'name'));
-        $this->assertSame('testError', $this->getIntegrationTestCaseAttribute('failure', 2, 'name'));
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 2);
+        $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
+        $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
+        $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 0);
+        $this->assertTestPosition('failure', 'SimpleTest::testSuccess', 1);
+        $this->assertTestPosition('failure', 'SimpleTest::testFailure', 2);
+        $this->assertTestPosition('failure', 'SimpleTest::testError', 3);
 
-        $this->assertEquals(3, $this->getIntegrationTestSuiteAttribute('success', 'tests'));
-        $this->assertEquals(0, $this->getIntegrationTestSuiteAttribute('success', 'failures'));
-        $this->assertEquals(0, $this->getIntegrationTestSuiteAttribute('success', 'errors'));
-        $this->assertSame('testFailure', $this->getIntegrationTestCaseAttribute('success', 0, 'name'));
-        $this->assertSame('testSuccess', $this->getIntegrationTestCaseAttribute('success', 1, 'name'));
-        $this->assertSame('testError', $this->getIntegrationTestCaseAttribute('success', 2, 'name'));
+        $this->assertTestSuitePosition('success', 'SimpleTest', 1);
+        $this->assertTestSuiteResult('success', 'SimpleTest', 'tests', 3);
+        $this->assertTestSuiteResult('success', 'SimpleTest', 'failures', 0);
+        $this->assertTestSuiteResult('success', 'SimpleTest', 'errors', 0);
+        $this->assertTestPosition('success', 'SimpleTest::testFailure', 1);
+        $this->assertTestPosition('success', 'SimpleTest::testSuccess', 2);
+        $this->assertTestPosition('success', 'SimpleTest::testError', 3);
 
-        $this->assertEquals(3, $this->getIntegrationTestSuiteAttribute('retry', 'tests'));
-        $this->assertEquals(0, $this->getIntegrationTestSuiteAttribute('retry', 'failures'));
-        $this->assertEquals(0, $this->getIntegrationTestSuiteAttribute('retry', 'errors'));
-        $this->assertSame('testFailure', $this->getIntegrationTestCaseAttribute('retry', 0, 'name'));
-        $this->assertSame('testSuccess', $this->getIntegrationTestCaseAttribute('retry', 1, 'name'));
-        $this->assertSame('testError', $this->getIntegrationTestCaseAttribute('retry', 2, 'name'));
+        $this->assertTestSuitePosition('retry', 'SimpleTest', 1);
+        $this->assertTestSuiteResult('retry', 'SimpleTest', 'tests', 3);
+        $this->assertTestSuiteResult('retry', 'SimpleTest', 'failures', 0);
+        $this->assertTestSuiteResult('retry', 'SimpleTest', 'errors', 0);
+        $this->assertTestPosition('retry', 'SimpleTest::testFailure', 1);
+        $this->assertTestPosition('retry', 'SimpleTest::testSuccess', 2);
+        $this->assertTestPosition('retry', 'SimpleTest::testError', 3);
+    }
+
+    public function testSimpleCaseGrouped_ErrorsOnly()
+    {
+        $this->runTests('SimpleTest', 'error', 'failure', false, 'grp');
+        $this->runTests('SimpleTest', 'success', 'success', true, 'grp');
+        $this->runTests('SimpleTest', 'success', 'retry', true, 'grp');
+
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 2);
+        $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
+        $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 0);
+        $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
+        $this->assertTestPosition('failure', 'SimpleTest::testSuccess', 1);
+        $this->assertTestPosition('failure', 'SimpleTest::testFailure', 2);
+        $this->assertTestPosition('failure', 'SimpleTest::testError', 3);
+
+        $this->assertTestSuitePosition('success', 'SimpleTest', 1);
+        $this->assertTestSuiteResult('success', 'SimpleTest', 'tests', 3);
+        $this->assertTestSuiteResult('success', 'SimpleTest', 'failures', 0);
+        $this->assertTestSuiteResult('success', 'SimpleTest', 'errors', 0);
+        $this->assertTestPosition('success', 'SimpleTest::testError', 1);
+        $this->assertTestPosition('success', 'SimpleTest::testSuccess', 2);
+        $this->assertTestPosition('success', 'SimpleTest::testFailure', 3);
+
+        $this->assertTestSuitePosition('retry', 'SimpleTest', 1);
+        $this->assertTestSuiteResult('retry', 'SimpleTest', 'tests', 3);
+        $this->assertTestSuiteResult('retry', 'SimpleTest', 'failures', 0);
+        $this->assertTestSuiteResult('retry', 'SimpleTest', 'errors', 0);
+        $this->assertTestPosition('retry', 'SimpleTest::testError', 1);
+        $this->assertTestPosition('retry', 'SimpleTest::testSuccess', 2);
+        $this->assertTestPosition('retry', 'SimpleTest::testFailure', 3);
+    }
+
+    public function testSimpleCaseGrouped_ErrorsAndFailures()
+    {
+        $this->runTests('SimpleTest', 'error-failure', 'failure', false, 'grp');
+        $this->runTests('SimpleTest', 'success', 'success', true, 'grp');
+        $this->runTests('SimpleTest', 'success', 'retry', true, 'grp');
+
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 2);
+        $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
+        $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
+        $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
+        $this->assertTestPosition('failure', 'SimpleTest::testSuccess', 1);
+        $this->assertTestPosition('failure', 'SimpleTest::testFailure', 2);
+        $this->assertTestPosition('failure', 'SimpleTest::testError', 3);
+
+        $this->assertTestSuitePosition('success', 'SimpleTest', 1);
+        $this->assertTestSuiteResult('success', 'SimpleTest', 'tests', 3);
+        $this->assertTestSuiteResult('success', 'SimpleTest', 'failures', 0);
+        $this->assertTestSuiteResult('success', 'SimpleTest', 'errors', 0);
+        $this->assertTestPosition('success', 'SimpleTest::testFailure', 1);
+        $this->assertTestPosition('success', 'SimpleTest::testError', 2);
+        $this->assertTestPosition('success', 'SimpleTest::testSuccess', 3);
+
+        $this->assertTestSuitePosition('retry', 'SimpleTest', 1);
+        $this->assertTestSuiteResult('retry', 'SimpleTest', 'tests', 3);
+        $this->assertTestSuiteResult('retry', 'SimpleTest', 'failures', 0);
+        $this->assertTestSuiteResult('retry', 'SimpleTest', 'errors', 0);
+        $this->assertTestPosition('retry', 'SimpleTest::testFailure', 1);
+        $this->assertTestPosition('retry', 'SimpleTest::testError', 2);
+        $this->assertTestPosition('retry', 'SimpleTest::testSuccess', 3);
     }
 
     private function runTests($testFile, $state, $runName, $expectedResult, $group = null)
@@ -94,6 +225,8 @@ class IntegrationTest extends TestCase
             $commandString .= ' --group ' . $group;
         }
 
+        //error_log(sprintf($commandString, $state));
+
         $process = new Process(sprintf($commandString, $state));
         $process->setWorkingDirectory(__DIR__ . '/../');
         $process->run();
@@ -104,18 +237,74 @@ class IntegrationTest extends TestCase
         );
     }
 
-    private function getIntegrationTestResult($runName)
+    private static function assertTestPosition($runName, $testName, $expectedPosition)
     {
-        return simplexml_load_file(__DIR__ . '/../result-' . $runName . '.xml');
+        $resultFilePath = static::getResultFilePath($runName);
+        list($class, $method) = explode('::', $testName);
+        $expression = sprintf(
+            '//testsuite[contains(@name, "%s")]/testcase[%d][@name="%s"]',
+            $class,
+            $expectedPosition,
+            $method
+        );
+
+        $xml = file_get_contents($resultFilePath);
+        static::assertXpathNotEmpty(
+            $xml,
+            $expression,
+            sprintf('Could not find XPath expression "%s" in "%s" (%s)', $expression, $resultFilePath, $xml)
+        );
     }
 
-    private function getIntegrationTestSuiteAttribute($state, $attribute)
+    private static function assertTestSuitePosition($runName, $suite, $expectedPosition)
     {
-        return (string) $this->getIntegrationTestResult($state)->testsuite[$attribute];
+        $resultFilePath = static::getResultFilePath($runName);
+        $expression = sprintf(
+            '//testsuite/testsuite[%d][contains(@name, "%s")]',
+            $expectedPosition,
+            $suite
+        );
+
+        $xml = file_get_contents($resultFilePath);
+        static::assertXpathNotEmpty(
+            $xml,
+            $expression,
+            sprintf('Could not find XPath expression "%s" in "%s" (%s)', $expression, $resultFilePath, $xml)
+        );
     }
 
-    private function getIntegrationTestCaseAttribute($state, $index, $attribute)
+    private static function assertTestSuiteResult($runName, $class, $attribute, $expectedValue)
     {
-        return (string) $this->getIntegrationTestResult($state)->testsuite->testsuite->testcase[$index][$attribute];
+        $resultFilePath = static::getResultFilePath($runName);
+        $expression = sprintf(
+            '//testsuite[contains(@name, "%s")]/@%s',
+            $class,
+            $attribute
+        );
+
+        $xml = file_get_contents($resultFilePath);
+        static::assertXpathEquals($xml, $expression, $expectedValue);
+    }
+
+    private static function assertXpathNotEmpty($xml, $xpath, $comment = null)
+    {
+        $xml = new SimpleXMLElement($xml);
+
+        static::assertNotEmpty(
+            (array) $xml->xpath($xpath),
+            $comment ?: sprintf('Could not find "%s" in "%s"', $xpath, $xml)
+        );
+    }
+
+    private static function assertXpathEquals($xml, $xpath, $expectedValue, $comment = null)
+    {
+        static::assertXpathNotEmpty($xml, $xpath);
+        $xml = new SimpleXMLElement($xml);
+        static::assertEquals($expectedValue, (string) $xml->xpath($xpath)[0]);
+    }
+
+    private static function getResultFilePath($runName)
+    {
+        return __DIR__ . '/../result-' . $runName . '.xml';
     }
 }

@@ -1,0 +1,30 @@
+<phpunit
+    backupGlobals="false"
+    convertErrorsToExceptions="true"
+    convertWarningsToExceptions="true"
+    convertNoticesToExceptions="true"
+    strict="true"
+    verbose="false"
+    colors="false">
+
+    <listeners>
+        <listener
+            class="PHPUnit\Runner\CleverAndSmart\TestListener"
+            file="../../../../../../src/PHPUnit/Runner/CleverAndSmart/TestListener.php">
+            <arguments>
+            </arguments>
+        </listener>
+    </listeners>
+
+    <testsuites>
+        <testsuite name="tests">
+            <directory>./fixture</directory>
+        </testsuite>
+    </testsuites>
+
+    <php>
+        <const name="PHPUNIT_RUNNER_CLEVERANDSMART_FAILURE" value="false"/>
+        <const name="PHPUNIT_RUNNER_CLEVERANDSMART_ERROR" value="true"/>
+        <const name="PHPUNIT_RUNNER_CLEVERANDSMART_SUCCESS" value="true"/>
+    </php>
+</phpunit>

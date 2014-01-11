@@ -2,6 +2,7 @@
 namespace PHPUnit\Runner\CleverAndSmart;
 
 use ReflectionObject;
+use ReflectionProperty;
 
 final class Util
 {
@@ -33,6 +34,11 @@ final class Util
         static::getPropertyReflection($object, $propertyName)->setValue($object, $value);
     }
 
+    /**
+     * @param object $object
+     * @param string $propertyName
+     * @return ReflectionProperty
+     */
     private static function getPropertyReflection($object, $propertyName)
     {
         $reflected = new ReflectionObject($object);
