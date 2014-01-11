@@ -4,7 +4,6 @@ namespace PHPUnit\Tests\Runner\CleverAndSmart\Integration;
 use PHPUnit_Framework_TestCase as TestCase;
 use SimpleXMLElement;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Process\ProcessBuilder;
 
 class IntegrationTest extends TestCase
 {
@@ -32,7 +31,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true);
         $this->runTests('SimpleTest', 'success', 'retry', true);
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', 2);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 0);
@@ -63,7 +62,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true);
         $this->runTests('SimpleTest', 'success', 'retry', true);
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', 2);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 0);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
@@ -94,7 +93,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true);
         $this->runTests('SimpleTest', 'success', 'retry', true);
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', 2);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
@@ -125,7 +124,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true, 'grp');
         $this->runTests('SimpleTest', 'success', 'retry', true, 'grp');
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', 2);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 0);
@@ -156,7 +155,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true, 'grp');
         $this->runTests('SimpleTest', 'success', 'retry', true, 'grp');
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', 2);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 0);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
@@ -187,7 +186,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true, 'grp');
         $this->runTests('SimpleTest', 'success', 'retry', true, 'grp');
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', 2);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
@@ -212,6 +211,37 @@ class IntegrationTest extends TestCase
         $this->assertTestPosition('retry', 'SimpleTest::testSuccess', 3);
     }
 
+    public function testDataDrivenTestCase()
+    {
+        $this->runTests('DataTest', 'error', 'failure', false, 'grp');
+        $this->runTests('DataTest', 'success', 'success', true, 'grp');
+        $this->runTests('DataTest', 'success', 'retry', true, 'grp');
+
+        $this->assertTestSuitePosition('failure', 'DataTest', 1);
+        $this->assertTestSuiteResult('failure', 'DataTest', 'tests', 3);
+        $this->assertTestSuiteResult('failure', 'DataTest', 'failures', 0);
+        $this->assertTestSuiteResult('failure', 'DataTest', 'errors', 1);
+        $this->assertTestPosition('failure', 'DataTest::testData with data set #0', 1);
+        $this->assertTestPosition('failure', 'DataTest::testData with data set #1', 2);
+        $this->assertTestPosition('failure', 'DataTest::testData with data set #2', 3);
+
+        $this->assertTestSuitePosition('success', 'DataTest', 1);
+        $this->assertTestSuiteResult('success', 'DataTest', 'tests', 3);
+        $this->assertTestSuiteResult('success', 'DataTest', 'failures', 0);
+        $this->assertTestSuiteResult('success', 'DataTest', 'errors', 0);
+        $this->assertTestPosition('success', 'DataTest::testData with data set #1', 1);
+        $this->assertTestPosition('success', 'DataTest::testData with data set #0', 2);
+        $this->assertTestPosition('success', 'DataTest::testData with data set #2', 3);
+
+        $this->assertTestSuitePosition('retry', 'DataTest', 1);
+        $this->assertTestSuiteResult('retry', 'DataTest', 'tests', 3);
+        $this->assertTestSuiteResult('retry', 'DataTest', 'failures', 0);
+        $this->assertTestSuiteResult('retry', 'DataTest', 'errors', 0);
+        $this->assertTestPosition('retry', 'DataTest::testData with data set #1', 1);
+        $this->assertTestPosition('retry', 'DataTest::testData with data set #0', 2);
+        $this->assertTestPosition('retry', 'DataTest::testData with data set #2', 3);
+    }
+
     private function runTests($testFile, $state, $runName, $expectedResult, $group = null)
     {
         $phpunit = realpath(__DIR__ . '/../../../../../../../vendor/bin/phpunit');
@@ -224,8 +254,6 @@ class IntegrationTest extends TestCase
         if ($group) {
             $commandString .= ' --group ' . $group;
         }
-
-        //error_log(sprintf($commandString, $state));
 
         $process = new Process(sprintf($commandString, $state));
         $process->setWorkingDirectory(__DIR__ . '/../');
