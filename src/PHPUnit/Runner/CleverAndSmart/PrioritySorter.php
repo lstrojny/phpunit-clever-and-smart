@@ -39,7 +39,7 @@ class PrioritySorter
             }
         }
 
-        $groups = Util::getInvisibleProperty($suite, 'getGroupDetails', 'groups');
+        $groups = Util::getInvisibleProperty($suite, 'groups', 'getGroupDetails');
         $areGroupsReordered = false;
         foreach ($groups as $groupName => $group) {
 
@@ -58,11 +58,11 @@ class PrioritySorter
         }
 
         if ($areTestsReordered) {
-            Util::setInvisibleProperty($suite, 'setTests', 'tests', iterator_to_array($orderedTests));
+            Util::setInvisibleProperty($suite, 'tests', iterator_to_array($orderedTests), 'setTests');
         }
 
         if ($areGroupsReordered) {
-            Util::setInvisibleProperty($suite, 'setGroupDetails', 'groups', $groups);
+            Util::setInvisibleProperty($suite, 'groups', $groups, 'setGroupDetails');
         }
 
         return $areTestsReordered || $areGroupsReordered;
@@ -72,7 +72,7 @@ class PrioritySorter
     {
         if (($test instanceof TestSuite && $this->sortTestSuite($test)) ||
             ($test instanceof TestCase &&
-                !Util::getInvisibleProperty($test, 'hasDependencies', 'dependencies') &&
+                !Util::getInvisibleProperty($test, 'dependencies', 'hasDependencies') &&
                 $this->isError($test)
             )
         ) {

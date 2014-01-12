@@ -13,7 +13,7 @@ class Run
 
     public function __construct($runId = null, DateTime $ranAt = null)
     {
-        $this->runId = $runId ?: Util::getRunId();
+        $this->runId = $runId ?: Util::createRunId();
         $this->ranAt = $ranAt ?: DateTime::createFromFormat('U.u', microtime(true));
     }
 

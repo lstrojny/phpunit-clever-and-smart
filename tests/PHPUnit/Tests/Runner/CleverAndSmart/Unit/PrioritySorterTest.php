@@ -162,7 +162,7 @@ class PrioritySorterTest extends TestCase
         $this->assertSame('test2', $tests[1]->getName());
         $this->assertSame('test3', $tests[2]->getName());
         $this->assertSame('test4', $tests[3]->getName());
-        $tests = Util::getInvisibleProperty($suite, 'getGroupDetails', 'groups')['g1'];
+        $tests = Util::getInvisibleProperty($suite, 'groups', 'getGroupDetails')['g1'];
         $this->assertSame('test1', $tests[0]->getName());
         $this->assertSame('test2', $tests[1]->getName());
         $this->assertSame('test3', $tests[2]->getName());
@@ -176,7 +176,7 @@ class PrioritySorterTest extends TestCase
         $this->assertSame('test1', $tests[1]->getName());
         $this->assertSame('test3', $tests[2]->getName());
         $this->assertSame('test4', $tests[3]->getName());
-        $tests = Util::getInvisibleProperty($suite, 'getGroupDetails', 'groups')['g1'];
+        $tests = Util::getInvisibleProperty($suite, 'groups', 'getGroupDetails')['g1'];
         $this->assertSame('test2', $tests[0]->getName());
         $this->assertSame('test1', $tests[1]->getName());
         $this->assertSame('test3', $tests[2]->getName());
@@ -202,7 +202,7 @@ class PrioritySorterTest extends TestCase
         $this->assertSame('test2', $tests[2]->getName());
         $this->assertSame('test4', $tests[3]->getName());
         $this->assertSame('test5', $tests[4]->getName());
-        $tests = Util::getInvisibleProperty($suite1, 'getGroupDetails', 'groups')['g1'];
+        $tests = Util::getInvisibleProperty($suite1, 'groups', 'getGroupDetails')['g1'];
         $this->assertSame('suite2', $tests[0]->getName());
         $this->assertSame('test3', $tests[0]->tests()[0]->getName());
         $this->assertSame('test1', $tests[1]->getName());
@@ -220,7 +220,7 @@ class PrioritySorterTest extends TestCase
         $this->assertSame('test1', $tests[2]->getName());
         $this->assertSame('test4', $tests[3]->getName());
         $this->assertSame('test5', $tests[4]->getName());
-        $tests = Util::getInvisibleProperty($suite1, 'getGroupDetails', 'groups')['g1'];
+        $tests = Util::getInvisibleProperty($suite1, 'groups', 'getGroupDetails')['g1'];
         $this->assertSame('test2', $tests[0]->getName());
         $this->assertSame('suite2', $tests[1]->getName());
         $this->assertSame('test3', $tests[1]->tests()[0]->getName());
