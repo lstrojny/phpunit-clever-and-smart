@@ -2,7 +2,7 @@
 namespace PHPUnit\Runner\CleverAndSmart\Unit;
 
 use PHPUnit\Runner\CleverAndSmart\PrioritySorter;
-use PHPUnit\Runner\CleverAndSmart\TestSuiteDecorator;
+use PHPUnit\Runner\CleverAndSmart\Util;
 use PHPUnit_Framework_TestCase as TestCase;
 use PHPUnit_Framework_TestSuite as TestSuite;
 
@@ -151,7 +151,7 @@ class PrioritySorterTest extends TestCase
 
     public function testSimpleSortingGroups()
     {
-        $suite = TestSuiteDecorator::decorate(new TestSuite('suite1', 'suite1'));
+        $suite = new TestSuite('suite1', 'suite1');
         $suite->addTest(new Test('test1'), ['g1']);
         $suite->addTest(new Test('test2'), ['g1']);
         $suite->addTest(new Test('test3'), ['g1']);
@@ -162,7 +162,7 @@ class PrioritySorterTest extends TestCase
         $this->assertSame('test2', $tests[1]->getName());
         $this->assertSame('test3', $tests[2]->getName());
         $this->assertSame('test4', $tests[3]->getName());
-        $tests = $suite->getGroupDetails()['g1'];
+        $tests = Util::getInvisibleProperty($suite, 'getGroupDetails', 'groups')['g1'];
         $this->assertSame('test1', $tests[0]->getName());
         $this->assertSame('test2', $tests[1]->getName());
         $this->assertSame('test3', $tests[2]->getName());
@@ -176,7 +176,7 @@ class PrioritySorterTest extends TestCase
         $this->assertSame('test1', $tests[1]->getName());
         $this->assertSame('test3', $tests[2]->getName());
         $this->assertSame('test4', $tests[3]->getName());
-        $tests = $suite->getGroupDetails()['g1'];
+        $tests = Util::getInvisibleProperty($suite, 'getGroupDetails', 'groups')['g1'];
         $this->assertSame('test2', $tests[0]->getName());
         $this->assertSame('test1', $tests[1]->getName());
         $this->assertSame('test3', $tests[2]->getName());
@@ -186,7 +186,7 @@ class PrioritySorterTest extends TestCase
 
     public function testNestedSortingGroups()
     {
-        $suite1 = TestSuiteDecorator::decorate(new TestSuite('suite1', 'suite1'));
+        $suite1 = new TestSuite('suite1', 'suite1');
         $suite2 = new TestSuite('suite2', 'suite2');
         $suite2->addTest(new Test('test3'), ['g1']);
         $suite1->addTestSuite($suite2);
@@ -202,7 +202,7 @@ class PrioritySorterTest extends TestCase
         $this->assertSame('test2', $tests[2]->getName());
         $this->assertSame('test4', $tests[3]->getName());
         $this->assertSame('test5', $tests[4]->getName());
-        $tests = $suite1->getGroupDetails()['g1'];
+        $tests = Util::getInvisibleProperty($suite1, 'getGroupDetails', 'groups')['g1'];
         $this->assertSame('suite2', $tests[0]->getName());
         $this->assertSame('test3', $tests[0]->tests()[0]->getName());
         $this->assertSame('test1', $tests[1]->getName());
@@ -220,7 +220,7 @@ class PrioritySorterTest extends TestCase
         $this->assertSame('test1', $tests[2]->getName());
         $this->assertSame('test4', $tests[3]->getName());
         $this->assertSame('test5', $tests[4]->getName());
-        $tests = $suite1->getGroupDetails()['g1'];
+        $tests = Util::getInvisibleProperty($suite1, 'getGroupDetails', 'groups')['g1'];
         $this->assertSame('test2', $tests[0]->getName());
         $this->assertSame('suite2', $tests[1]->getName());
         $this->assertSame('test3', $tests[1]->tests()[0]->getName());
