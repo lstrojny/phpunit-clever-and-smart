@@ -143,4 +143,22 @@ class UtilTest extends TestCase
         Util::setInvisibleProperty($child, 'invalidProperty', 'public2', 'setPublicProperty');
         $this->assertSame('public2', Util::getInvisibleProperty($child, 'invalidProperty', 'getPublicProperty'));
     }
+
+    public function testGetInvalidProperty()
+    {
+        $this->setExpectedException(
+            'PHPUnit\Runner\CleverAndSmart\Exception\PropertyReflectionException',
+            'Property invalidProperty does not exist in hierarchy PHPUnit\Runner\CleverAndSmart\Unit\Child < PHPUnit\Runner\CleverAndSmart\Unit\Mother'
+        );
+        Util::getInvisibleProperty(new Child(), 'invalidProperty');
+    }
+
+    public function testSetInvalidProperty()
+    {
+        $this->setExpectedException(
+            'PHPUnit\Runner\CleverAndSmart\Exception\PropertyReflectionException',
+            'Property invalidProperty does not exist in hierarchy PHPUnit\Runner\CleverAndSmart\Unit\Child < PHPUnit\Runner\CleverAndSmart\Unit\Mother'
+        );
+        Util::setInvisibleProperty(new Child(), 'invalidProperty', 'value');
+    }
 }

@@ -1,6 +1,7 @@
 <?php
 namespace PHPUnit\Runner\CleverAndSmart;
 
+use PHPUnit\Runner\CleverAndSmart\Exception\PropertyReflectionException;
 use ReflectionException;
 use ReflectionObject;
 use ReflectionProperty;
@@ -70,7 +71,7 @@ final class Util
     {
         $reflected = new ReflectionObject($object);
 
-        $classes = [];
+        $classHierarchy = [];
 
         do {
             try {
@@ -82,13 +83,12 @@ final class Util
 
             } catch (ReflectionException $e) {
 
-                $classes[] = $reflected->getName();
-                $e = new ReflectionException($e->getMessage() . ' in ' . join(', ', $classes), null, $e);
+                $classHierarchy[] = $reflected->getName();
+                $e = PropertyReflectionException::propertyNotExistsInHierarchy($e, $classHierarchy);
 
             }
         } while ($reflected = $reflected->getParentClass());
 
         throw $e;
     }
-
 }

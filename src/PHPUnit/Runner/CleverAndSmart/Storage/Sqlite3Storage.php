@@ -2,6 +2,7 @@
 namespace PHPUnit\Runner\CleverAndSmart\Storage;
 
 use Closure;
+use PHPUnit\Runner\CleverAndSmart\Exception\StorageException;
 use PHPUnit_Framework_TestCase as TestCase;
 use PHPUnit\Runner\CleverAndSmart\Run;
 use Exception;
@@ -180,8 +181,8 @@ class Sqlite3Storage implements StorageInterface
     {
         $result = $this->db->query($query);
 
-        if ($this->db->lastErrorCode() !== 0) {
-            throw new Exception($this->db->lastErrorMsg() . ' (error code ' . $this->db->lastErrorCode() . ')');
+        if ($this->db->lastErrorCode() > 0) {
+            throw StorageException::databaseError($this->db->lastErrorMsg(), $this->db->lastErrorCode());
         }
 
         return $result;
