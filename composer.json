@@ -2,8 +2,15 @@
     "name": "lstrojny/phpunit-clever-and-smart",
     "description": "A clever test runner for PHPUnit",
     "license": "MIT",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/lstrojny/phpunit"
+        }
+    ],
+    "minimum-stability": "dev",
     "require": {
-        "phpunit/phpunit": "3.*"
+        "phpunit/phpunit": "dev-feature/setters"
     },
     "require-dev": {
         "symfony/process": "2.*"

@@ -29,7 +29,7 @@ class PrioritySorter
 
     private function sortTestSuite(TestSuite $suite)
     {
-        $suite = TestSuiteDecorator::decorate($suite);
+        //$suite = TestSuiteDecorator::decorate($suite);
 
         $tests = $suite->tests();
         $orderedTests = $this->createQueue($tests);

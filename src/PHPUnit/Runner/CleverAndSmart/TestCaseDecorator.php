@@ -19,6 +19,10 @@ class TestCaseDecorator extends TestCase
      */
     public static function decorate(TestCase $testCase)
     {
+        if (method_exists($testCase, 'hasDependencies')) {
+            return $testCase;
+        }
+
         return $testCase instanceof self ? $testCase : new self($testCase);
     }
 
@@ -195,7 +199,8 @@ class TestCaseDecorator extends TestCase
         $callOriginalConstructor = true,
         $callOriginalClone = true,
         $callAutoload = true,
-        $cloneArguments = false
+        $cloneArguments = false,
+        $callOriginalMethods = false
     )
     {
         return $this->wrapped->getMock(
@@ -206,7 +211,8 @@ class TestCaseDecorator extends TestCase
             $callOriginalConstructor,
             $callOriginalClone,
             $callAutoload,
-            $cloneArguments
+            $cloneArguments,
+            $callOriginalMethods
         );
     }
 

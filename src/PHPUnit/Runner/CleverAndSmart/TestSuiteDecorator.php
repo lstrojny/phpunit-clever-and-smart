@@ -20,6 +20,12 @@ class TestSuiteDecorator extends TestSuite
      */
     public static function decorate(TestSuite $suite)
     {
+        if (method_exists($suite, 'setTests') &&
+            method_exists($suite, 'getGroupDetails') &&
+            method_exists($suite, 'setGroupDetails')) {
+            return $suite;
+        }
+
         return $suite instanceof self ? $suite : new self($suite);
     }
 
