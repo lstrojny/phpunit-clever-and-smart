@@ -16,8 +16,8 @@ before_script:
   - php composer.phar install --dev
 
 script:
-  - phpunit --configuration phpunit-unit.xml.dist
-  - phpunit --configuration phpunit-integration.xml.dist
+  - vendor/bin/phpunit --configuration phpunit-unit.xml.dist
+  - vendor/bin/phpunit --configuration phpunit-integration.xml.dist
 
 notifications:
   email:
