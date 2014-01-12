@@ -4,9 +4,16 @@ php:
   - 5.5
   - hhvm
 
+matrix:
+  - PHPUNIT_VERSION=~3.5
+  - PHPUNIT_VERSION=~3.6
+  - PHPUNIT_VERSION=~3.7
+  - PHPUNIT_VERSION=master
+
 before_script:
   - wget http://getcomposer.org/composer.phar
   - php composer.phar install --dev
+  - php composer.phar require phpunit/phpunit $PHPUNIT_VERSION
 
 script:
   - phpunit --configuration phpunit-unit.xml.dist
