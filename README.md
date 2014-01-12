@@ -6,6 +6,33 @@
 
 It’s probably not yet very stable but try it out.
 
+### What it does
+
+Run a test suite once with errors
+
+```
+PHPUnit 3.7.28 by Sebastian Bergmann.
+
+.............................................FSFS..............  63 / 280 ( 22%)
+............................................................... 126 / 280 ( 45%)
+............................................................... 189 / 280 ( 67%)
+............................................................... 252 / 280 ( 90%)
+.........................
+```
+
+Rerun that test suite and see how the previous failing tests have been sorted to the beginning of the test run:
+
+
+```
+PHPUnit 3.7.28 by Sebastian Bergmann.
+
+FSFS...........................................................  63 / 280 ( 22%)
+............................................................... 126 / 280 ( 45%)
+............................................................... 189 / 280 ( 67%)
+............................................................... 252 / 280 ( 90%)
+.........................
+```
+
 ## Configuration
 To play around with it, add this to your `phpunit.xml(.dist)`
 ```
@@ -17,3 +44,10 @@ To play around with it, add this to your `phpunit.xml(.dist)`
         </listener>
     </listeners>
 ```
+
+## Roadmap
+
+ - Test it with as many test suites as possible
+ - Let the weight decline over time. The older a test failure is, the less likely it should be it is run first
+ - Capture fata errors (through `register_shutdown_function()`)
+ - Register `Ctrl+c` (through signals)
