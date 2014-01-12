@@ -1,4 +1,4 @@
-# Clever Test Runner for PHPUnit
+# Clever Test Runner for PHPUnit [![Build Status](https://secure.travis-ci.org/lstrojny/phpunit-clever-and-smart.png)](http://travis-ci.org/lstrojny/phpunit-clever-and-smart)
 
 ## Mission
  - Store previous test runs in a database
