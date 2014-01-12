@@ -28,12 +28,12 @@ class TestSuiteDecorator extends TestSuite
         $this->wrapped->tests = $tests;
     }
 
-    public function getTestGroups()
+    public function getGroupDetails()
     {
         return $this->wrapped->groups;
     }
 
-    public function setTestGroups(array $groups)
+    public function setGroupDetails(array $groups)
     {
         $this->wrapped->groups = $groups;
     }

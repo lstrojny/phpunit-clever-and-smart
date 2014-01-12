@@ -41,7 +41,7 @@ class PrioritySorter
             }
         }
 
-        $groups = $suite->getTestGroups();
+        $groups = $suite->getGroupDetails();
         $areGroupsReordered = false;
         foreach ($groups as $groupName => $group) {
 
@@ -64,7 +64,7 @@ class PrioritySorter
         }
 
         if ($areGroupsReordered) {
-            $suite->setTestGroups($groups);
+            $suite->setGroupDetails($groups);
         }
 
         return $areTestsReordered || $areGroupsReordered;
