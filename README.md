@@ -4,7 +4,7 @@
  - Store previous test runs in a database
  - Re-run the tests first that fail more often
 
-It’s by no means meant for "production".
+It’s probably not yet very stable but try it out.
 
 ## Configuration
 To play around with it, add this to your `phpunit.xml(.dist)`
