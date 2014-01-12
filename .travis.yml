@@ -12,8 +12,8 @@ env:
 
 before_script:
   - wget http://getcomposer.org/composer.phar
-  - php composer.phar install --dev
   - php composer.phar require phpunit/phpunit $PHPUNIT_VERSION
+  - php composer.phar install --dev
 
 script:
   - phpunit --configuration phpunit-unit.xml.dist
