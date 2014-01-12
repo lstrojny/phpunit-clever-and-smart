@@ -4,7 +4,7 @@ php:
   - 5.5
   - hhvm
 
-matrix:
+env:
   - PHPUNIT_VERSION=~3.5
   - PHPUNIT_VERSION=~3.6
   - PHPUNIT_VERSION=~3.7
