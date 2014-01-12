@@ -1,6 +1,7 @@
 <?php
 namespace PHPUnit\Runner\CleverAndSmart\Storage;
 
+use Closure;
 use PHPUnit_Framework_TestCase as TestCase;
 use PHPUnit\Runner\CleverAndSmart\Run;
 use Exception;
@@ -84,7 +85,7 @@ class Sqlite3Storage implements StorageInterface
         );
     }
 
-    private function transactional(callable $callable)
+    private function transactional(Closure $callable)
     {
         $this->query('BEGIN');
 
