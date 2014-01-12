@@ -29,8 +29,6 @@ class PrioritySorter
 
     private function sortTestSuite(TestSuite $suite)
     {
-        //$suite = TestSuiteDecorator::decorate($suite);
-
         $tests = $suite->tests();
         $orderedTests = $this->createQueue($tests);
 
@@ -41,7 +39,7 @@ class PrioritySorter
             }
         }
 
-        $groups = $suite->getGroupDetails();
+        $groups = Util::getInvisibleProperty($suite, 'getGroupDetails', 'groups');
         $areGroupsReordered = false;
         foreach ($groups as $groupName => $group) {
 
@@ -60,11 +58,11 @@ class PrioritySorter
         }
 
         if ($areTestsReordered) {
-            $suite->setTests(iterator_to_array($orderedTests));
+            Util::setInvisibleProperty($suite, 'setTests', 'tests', iterator_to_array($orderedTests));
         }
 
         if ($areGroupsReordered) {
-            $suite->setGroupDetails($groups);
+            Util::setInvisibleProperty($suite, 'setGroupDetails', 'groups', $groups);
         }
 
         return $areTestsReordered || $areGroupsReordered;
@@ -74,7 +72,7 @@ class PrioritySorter
     {
         if (($test instanceof TestSuite && $this->sortTestSuite($test)) ||
             ($test instanceof TestCase &&
-                !TestCaseDecorator::decorate($test)->hasDependencies() &&
+                !Util::getInvisibleProperty($test, 'hasDependencies', 'dependencies') &&
                 $this->isError($test)
             )
         ) {
