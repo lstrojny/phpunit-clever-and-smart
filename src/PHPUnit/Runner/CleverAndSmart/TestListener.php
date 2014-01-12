@@ -37,6 +37,10 @@ class TestListener implements TestListenerInterface
         $this->storage->recordError($this->run, $test);
     }
 
+    public function addRiskyTest(Test $test, Exception $e, $time)
+    {
+    }
+
     public function startTestSuite(TestSuite $suite)
     {
         if ($this->reordered) {
