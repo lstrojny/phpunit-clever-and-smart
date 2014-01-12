@@ -1,7 +1,6 @@
 <?php
 namespace PHPUnit\Runner\CleverAndSmart\Storage;
 
-use Exception;
 use PHPUnit_Framework_TestCase as TestCase;
 use PHPUnit\Runner\CleverAndSmart\Run;
 

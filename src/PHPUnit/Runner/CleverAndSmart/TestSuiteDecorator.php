@@ -4,7 +4,6 @@ namespace PHPUnit\Runner\CleverAndSmart;
 use PHPUnit_Framework_TestResult as TestResult;
 use PHPUnit_Framework_TestSuite as TestSuite;
 use PHPUnit_Framework_Test as Test;
-use PHPUnit_Framework_TestCase as TestCase;
 
 class TestSuiteDecorator extends TestSuite
 {

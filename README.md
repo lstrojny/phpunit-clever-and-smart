@@ -7,9 +7,8 @@
 It’s by no means meant for "production".
 
 ## TODO
- - Deal with `@depends`
- - Deal with data providers
  - Unit tests (how ironic)
+ - Typed exception handling
 
 ## Configuration
 To play around with it, add this to your `phpunit.xml(.dist)`

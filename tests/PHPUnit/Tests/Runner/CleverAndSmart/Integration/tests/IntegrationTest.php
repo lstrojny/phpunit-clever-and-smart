@@ -31,7 +31,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true);
         $this->runTests('SimpleTest', 'success', 'retry', true);
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', 3);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 4);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 0);
@@ -62,7 +62,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true);
         $this->runTests('SimpleTest', 'success', 'retry', true);
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', 3);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 4);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 0);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
@@ -93,7 +93,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true);
         $this->runTests('SimpleTest', 'success', 'retry', true);
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', 3);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 4);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
@@ -124,7 +124,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true, 'grp');
         $this->runTests('SimpleTest', 'success', 'retry', true, 'grp');
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', 3);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 4);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 0);
@@ -155,7 +155,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true, 'grp');
         $this->runTests('SimpleTest', 'success', 'retry', true, 'grp');
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', 3);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 4);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 0);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
@@ -186,7 +186,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true, 'grp');
         $this->runTests('SimpleTest', 'success', 'retry', true, 'grp');
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', 3);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 4);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
@@ -211,7 +211,7 @@ class IntegrationTest extends TestCase
         $this->assertTestPosition('retry', 'SimpleTest::testSuccess', 3);
     }
 
-    public function testDataDrivenTestCase()
+    public function testDataProviderTestCase()
     {
         $this->runTests('DataTest', 'error', 'failure', false, 'grp');
         $this->runTests('DataTest', 'success', 'success', true, 'grp');
@@ -240,6 +240,28 @@ class IntegrationTest extends TestCase
         $this->assertTestPosition('retry', 'DataTest::testData with data set #1', 1);
         $this->assertTestPosition('retry', 'DataTest::testData with data set #0', 2);
         $this->assertTestPosition('retry', 'DataTest::testData with data set #2', 3);
+    }
+
+    public function testDependentTest()
+    {
+        $this->runTests('DependentTest', 'failure', 'failure', false, 'grp');
+        $this->runTests('DependentTest', 'success', 'success', true, 'grp');
+        $this->runTests('DependentTest', 'success', 'retry', true, 'grp');
+
+        $this->assertTestSuitePosition('failure', 'DependentTest', 1);
+        $this->assertTestSuiteResult('failure', 'DependentTest', 'tests', 2);
+        $this->assertTestSuiteResult('failure', 'DependentTest', 'failures', 1);
+        $this->assertTestSuiteResult('failure', 'DependentTest', 'errors', 0);
+        $this->assertTestPosition('failure', 'DependentTest::testSuccess', 1);
+        $this->assertTestPosition('failure', 'DependentTest::testFailure', 2);
+
+        $this->assertTestSuitePosition('success', 'DependentTest', 1);
+        $this->assertTestSuiteResult('success', 'DependentTest', 'tests', 3);
+        $this->assertTestSuiteResult('success', 'DependentTest', 'failures', 0);
+        $this->assertTestSuiteResult('success', 'DependentTest', 'errors', 0);
+        $this->assertTestPosition('success', 'DependentTest::testSuccess', 1);
+        $this->assertTestPosition('success', 'DependentTest::testFailure', 2);
+        $this->assertTestPosition('success', 'DependentTest::testError', 3);
     }
 
     private function runTests($testFile, $state, $runName, $expectedResult, $group = null)

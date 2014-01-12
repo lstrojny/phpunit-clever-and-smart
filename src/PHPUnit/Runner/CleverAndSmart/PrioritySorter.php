@@ -73,7 +73,11 @@ class PrioritySorter
     private function sortTest($test, $position, SplQueue $orderedTests)
     {
         if (($test instanceof TestSuite && $this->sortTestSuite($test)) ||
-            ($test instanceof TestCase && $this->isError($test))) {
+            ($test instanceof TestCase &&
+                !TestCaseDecorator::decorate($test)->hasDependencies() &&
+                $this->isError($test)
+            )
+        ) {
 
             unset($orderedTests[$position]);
             $orderedTests->unshift($test);
