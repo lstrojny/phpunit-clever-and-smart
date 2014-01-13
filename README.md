@@ -3,9 +3,9 @@
 ## Mission
  - Store previous test runs in a database
  - On consecutive test runs, the following order is ensured
-   * Failures and Errors
-   * Unrecorded tests
-   * Slowest tests first
+   1. Failures and Errors
+   2. Unrecorded tests
+   3. Slowest tests first
 
 It’s probably not yet very stable but try it out.
 
