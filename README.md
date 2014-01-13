@@ -2,7 +2,10 @@
 
 ## Mission
  - Store previous test runs in a database
- - Re-run the tests first that fail more often
+ - On consecutive test runs, the following order is ensured
+   * Failures and Errors
+   * Unrecorded tests
+   * Slowest tests first
 
 It’s probably not yet very stable but try it out.
 
