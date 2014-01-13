@@ -1,11 +1,11 @@
 # Clever Test Runner for PHPUnit [![Build Status](https://secure.travis-ci.org/lstrojny/phpunit-clever-and-smart.png)](http://travis-ci.org/lstrojny/phpunit-clever-and-smart)
 
 ## Mission
- - Store previous test runs in a database
- - On consecutive test runs, the following order is ensured
-   1. Failures and Errors
-   2. Unrecorded tests
-   3. Slowest tests first
+Enable fast feedback cycles by storing test case results in a database and reorder tests on consecutive runs in the
+following order:
+  1. Failures and Errors
+  2. Unrecorded tests
+  3. Slowest tests first
 
 It’s probably not yet very stable but try it out.
 
