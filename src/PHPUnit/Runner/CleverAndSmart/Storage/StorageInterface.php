@@ -20,9 +20,10 @@ interface StorageInterface
      *
      * @param Run $run
      * @param TestCase $test
+     * @param float $time
      * @return void
      */
-    public function recordSuccess(Run $run, TestCase $test);
+    public function recordSuccess(Run $run, TestCase $test, $time);
 
     /**
      * Get recorded test errors
@@ -30,4 +31,9 @@ interface StorageInterface
      * @return array
      */
     public function getErrors();
+
+    /**
+     * @return array
+     */
+    public function getTimings();
 }

@@ -23,6 +23,9 @@ class Sqlite3StorageTest extends TestCase
     /** @var Run */
     private $run1;
 
+    /** @var Run */
+    private $run2;
+
     public function setUp()
     {
         $this->reset();
@@ -52,7 +55,7 @@ class Sqlite3StorageTest extends TestCase
     public function testRecordSuccess()
     {
         $this->assertEmpty($this->storage->getErrors());
-        $this->storage->recordSuccess($this->run1, $this->test1);
+        $this->storage->recordSuccess($this->run1, $this->test1, 1000);
         $this->assertEmpty($this->storage->getErrors());
     }
 
@@ -81,22 +84,37 @@ class Sqlite3StorageTest extends TestCase
         );
     }
 
+    public function testRecordTimings()
+    {
+        $this->assertEmpty($this->storage->getErrors());
+        $this->storage->recordSuccess($this->run1, $this->test1, 1);
+        $this->storage->recordSuccess($this->run2, $this->test1, 2);
+        $this->storage->recordSuccess($this->run2, $this->test2, 2);
+        $this->assertEmpty($this->storage->getErrors());
+        $this->assertSame(
+            [
+                ['class' => 'PHPUnit\Runner\CleverAndSmart\Unit\Storage\Test', 'test' => 'testMethod2', 'time' => 2.0],
+                ['class' => 'PHPUnit\Runner\CleverAndSmart\Unit\Storage\Test', 'test' => 'testMethod1', 'time' => 1.5],
+            ],
+            $this->storage->getTimings()
+        );
+    }
+
     public function testRecordedErrorsAreRemovedAfterFiveTimes()
     {
         $this->assertEmpty($this->storage->getErrors());
         $this->storage->recordError($this->run1, $this->test1);
         $this->assertNotEmpty($this->storage->getErrors());
 
-        $this->storage->recordSuccess($this->run1, $this->test1);
+        $this->storage->recordSuccess($this->run1, $this->test1, 1);
         $this->assertNotEmpty($this->storage->getErrors());
-        $this->storage->recordSuccess($this->run1, $this->test1);
+        $this->storage->recordSuccess($this->run1, $this->test1, 2);
         $this->assertNotEmpty($this->storage->getErrors());
-        $this->storage->recordSuccess($this->run1, $this->test1);
+        $this->storage->recordSuccess($this->run1, $this->test1, 3);
         $this->assertNotEmpty($this->storage->getErrors());
-        $this->storage->recordSuccess($this->run1, $this->test1);
+        $this->storage->recordSuccess($this->run1, $this->test1, 4);
         $this->assertNotEmpty($this->storage->getErrors());
-        //$this->storage->recordSuccess($this->run1, $this->test1);
 
-        //$this->assertEmpty($this->storage->getErrors());
+        $this->assertNotEmpty($this->storage->getTimings());
     }
 }

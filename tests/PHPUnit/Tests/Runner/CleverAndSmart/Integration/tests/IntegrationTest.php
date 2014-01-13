@@ -14,7 +14,7 @@ class IntegrationTest extends TestCase
 
     public function tearDown()
     {
-        $this->reset();
+        //$this->reset();
     }
 
     private function reset()
@@ -262,6 +262,14 @@ class IntegrationTest extends TestCase
         $this->assertTestPosition('success', 'DependentTest::testSuccess', 1);
         $this->assertTestPosition('success', 'DependentTest::testFailure', 2);
         $this->assertTestPosition('success', 'DependentTest::testError', 3);
+
+        $this->assertTestSuitePosition('retry', 'DependentTest', 1);
+        $this->assertTestSuiteResult('retry', 'DependentTest', 'tests', 3);
+        $this->assertTestSuiteResult('retry', 'DependentTest', 'failures', 0);
+        $this->assertTestSuiteResult('retry', 'DependentTest', 'errors', 0);
+        $this->assertTestPosition('retry', 'DependentTest::testSuccess', 1);
+        $this->assertTestPosition('retry', 'DependentTest::testFailure', 2);
+        $this->assertTestPosition('retry', 'DependentTest::testError', 3);
     }
 
     private function runTests($testFile, $state, $runName, $expectedResult, $group = null)

@@ -9,6 +9,7 @@ use PHPUnit_Framework_TestSuite as TestSuite;
 use PHPUnit_Framework_AssertionFailedError as AssertionFailedError;
 use Exception;
 use ReflectionObject;
+use PHPUnit_Runner_BaseTestRunner as BaseTestRunner;
 
 class TestListener implements TestListenerInterface
 {
@@ -47,15 +48,14 @@ class TestListener implements TestListenerInterface
             return;
         }
         $this->reordered = true;
-
-        $sorter = new PrioritySorter($this->storage->getErrors());
+        $sorter = new PrioritySorter($this->storage->getErrors(), $this->storage->getTimings());
         $sorter->sort($suite);
     }
 
     public function endTest(Test $test, $time)
     {
         if ($test instanceof TestCase && $test->getStatus() === 0) {
-            $this->storage->recordSuccess($this->run, $test);
+            $this->storage->recordSuccess($this->run, $test, $time);
         }
     }
 

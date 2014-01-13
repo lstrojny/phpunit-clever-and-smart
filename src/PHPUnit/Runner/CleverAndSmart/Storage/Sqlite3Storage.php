@@ -10,7 +10,7 @@ use SQLite3;
 
 class Sqlite3Storage implements StorageInterface
 {
-    const SCHEMA_VERSION = '0_1_0';
+    const SCHEMA_VERSION = '0_2_0';
 
     private $db;
 
@@ -50,19 +50,42 @@ class Sqlite3Storage implements StorageInterface
                         error_id INTEGER,
                         UNIQUE (run_id, error_id),
                         FOREIGN KEY (error_id) REFERENCES {{prefix}}error(error_id) ON DELETE CASCADE,
-                        FOREIGN KEY (error_id) REFERENCES {{prefix}}error(error_id)  ON DELETE CASCADE
+                        FOREIGN KEY (error_id) REFERENCES {{prefix}}error(error_id) ON DELETE CASCADE
+                    )'
+                );
+                $this->query(
+                    'CREATE TABLE IF NOT EXISTS {{prefix}}success (
+                        success_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        success_time DOUBLE,
+                        success_class VARCHAR(1024),
+                        success_test VARCHAR(1024),
+                        success_identifier CHAR(128)
+                    )'
+                );
+                $this->query(
+                    'CREATE INDEX IF NOT EXISTS {{prefix}}success_time_idx ON {{prefix}}success(success_time)'
+                );
+                $this->query(
+                    'CREATE TABLE IF NOT EXISTS {{prefix}}run_success (
+                        run_success_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        run_id CHAR(128),
+                        success_id INTEGER,
+                        UNIQUE (run_id, success_id),
+                        FOREIGN KEY (success_id) REFERENCES {{prefix}}success(success_id) ON DELETE CASCADE,
+                        FOREIGN KEY (success_id) REFERENCES {{prefix}}success(success_id)  ON DELETE CASCADE
                     )'
                 );
             }
         );
     }
 
-    public function recordSuccess(Run $run, TestCase $test)
+    public function recordSuccess(Run $run, TestCase $test, $time)
     {
         $this->transactional(
-            function () use ($run, $test) {
+            function () use ($run, $test, $time) {
                 $this->storeRun($run);
                 $this->updateErrorCount($test, false);
+                $this->insertSuccess($run, $test, $time);
             }
         );
     }
@@ -83,6 +106,15 @@ class Sqlite3Storage implements StorageInterface
             'SELECT error_class AS class, error_test AS test
             FROM {{prefix}}error
             ORDER BY error_count DESC'
+        );
+    }
+
+    public function getTimings()
+    {
+        return $this->select(
+            'SELECT success_class AS class, success_test AS test, AVG(success_time) AS time
+            FROM {{prefix}}success
+            GROUP BY success_identifier'
         );
     }
 
@@ -110,7 +142,22 @@ class Sqlite3Storage implements StorageInterface
             [get_class($test), $test->getName(), 0]
         );
         $errorId = $this->updateErrorCount($test, true);
-        $this->storeRelation($run, $errorId);
+        $this->storeErrorRelation($run, $errorId);
+    }
+
+    private function insertSuccess(Run $run, TestCase $test, $time)
+    {
+        $className = get_class($test);
+        $testName = $test->getName();
+        $identifier = hash('sha512', $className . $testName);
+
+        $this->query(
+            "INSERT INTO {{prefix}}success (success_class, success_test, success_identifier, success_time)
+            VALUES ('%s', '%s', '%s', %F)",
+            [$className, $testName, $identifier, $time]
+        );
+
+        $this->storeSuccessRelation($run, $this->db->lastInsertRowID());
     }
 
     private function updateErrorCount(TestCase $test, $increment)
@@ -132,11 +179,19 @@ class Sqlite3Storage implements StorageInterface
         return $errorId;
     }
 
-    private function storeRelation(Run $run, $errorId)
+    private function storeErrorRelation(Run $run, $errorId)
     {
         $this->query(
             "INSERT OR IGNORE INTO {{prefix}}run_error (run_id, error_id) VALUES ('%s', %d)",
             [$run->getRunId(), $errorId]
+        );
+    }
+
+    private function storeSuccessRelation(Run $run, $successId)
+    {
+        $this->query(
+            "INSERT OR IGNORE INTO {{prefix}}run_success (run_id, success_id) VALUES ('%s', %d)",
+            [$run->getRunId(), $successId]
         );
     }
 

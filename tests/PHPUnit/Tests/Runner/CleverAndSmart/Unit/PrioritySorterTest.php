@@ -59,8 +59,8 @@ class PrioritySorterTest extends TestCase
         $sorter->sort($suite);
         $tests = $suite->tests();
 
-        $this->assertSame('test2', $tests[0]->getName());
-        $this->assertSame('test1', $tests[1]->getName());
+        $this->assertSame('test1', $tests[0]->getName());
+        $this->assertSame('test2', $tests[1]->getName());
         $this->assertSame('test3', $tests[2]->getName());
         $this->assertSame('test4', $tests[3]->getName());
     }
@@ -116,6 +116,45 @@ class PrioritySorterTest extends TestCase
         $this->assertSame('test1', $tests[2]->getName());
         $this->assertSame('test3', $tests[3]->getName());
         $this->assertSame('test4', $tests[4]->getName());
+    }
+
+    public function testNestedSortingWithTimings()
+    {
+        $suite1 = new TestSuite('suite1', 'suite1');
+        $suite2 = new TestSuite('suite2', 'suite2');
+        $suite2->addTest(new Test('test2.1'));
+        $suite2->addTest(new Test('test2.2'));
+        $suite1->addTestSuite($suite2);
+        $suite1->addTest(new Test('test1'));
+        $suite1->addTest(new Test('test2'));
+        $suite1->addTest(new Test('test3'));
+        $suite1->addTest(new Test('test4'));
+
+        $tests = $suite1->tests();
+        $this->assertSame('suite2', $tests[0]->getName());
+        $this->assertSame('test1', $tests[1]->getName());
+        $this->assertSame('test2', $tests[2]->getName());
+        $this->assertSame('test3', $tests[3]->getName());
+        $this->assertSame('test4', $tests[4]->getName());
+
+        $sorter = new PrioritySorter(
+            [['class' => 'PHPUnit\Runner\CleverAndSmart\Unit\Test', 'test' => 'test2']],
+            [
+                ['class' => 'PHPUnit\Runner\CleverAndSmart\Unit\Test', 'test' => 'test1', 'time' => 100],
+                ['class' => 'PHPUnit\Runner\CleverAndSmart\Unit\Test', 'test' => 'test4', 'time' => 200],
+                ['class' => 'PHPUnit\Runner\CleverAndSmart\Unit\Test', 'test' => 'test2.1', 'time' => 100],
+            ]
+        );
+        $sorter->sort($suite1);
+        $tests = $suite1->tests();
+
+        $this->assertSame('test2', $tests[0]->getName());
+        $this->assertSame('test3', $tests[1]->getName());
+        $this->assertSame('test4', $tests[2]->getName());
+        $this->assertSame('test1', $tests[4]->getName());
+        $this->assertSame('suite2', $tests[3]->getName());
+        $this->assertSame('test2.2', $tests[3]->tests()[0]->getName());
+        $this->assertSame('test2.1', $tests[3]->tests()[1]->getName());
     }
 
     public function testNestedSortingNoErrors()
@@ -182,7 +221,6 @@ class PrioritySorterTest extends TestCase
         $this->assertSame('test3', $tests[2]->getName());
         $this->assertSame('test4', $tests[3]->getName());
     }
-
 
     public function testNestedSortingGroups()
     {

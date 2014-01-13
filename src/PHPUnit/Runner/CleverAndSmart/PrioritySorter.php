@@ -3,23 +3,21 @@ namespace PHPUnit\Runner\CleverAndSmart;
 
 use PHPUnit_Framework_TestCase as TestCase;
 use PHPUnit_Framework_TestSuite as TestSuite;
-use SplQueue;
 
 class PrioritySorter
 {
+    const SORT_NONE = 0;
+    const SORT_TIMING = 1;
+    const SORT_ERROR = 2;
+
     private $errors = [];
 
-    public function __construct(array $errors)
+    private $timings = [];
+
+    public function __construct(array $errors, array $timings = [])
     {
         $this->errors = $errors;
-    }
-
-    private function createQueue(array $values)
-    {
-        $queue = new SplQueue();
-        array_map([$queue, 'push'], $values);
-
-        return $queue;
+        $this->timings = $timings;
     }
 
     public function sort(TestSuite $suite)
@@ -30,60 +28,109 @@ class PrioritySorter
     private function sortTestSuite(TestSuite $suite)
     {
         $tests = $suite->tests();
-        $orderedTests = $this->createQueue($tests);
+        $orderedTests = new SegmentedQueue($tests);
 
-        $areTestsReordered = false;
+        $testsOrderResult = [static::SORT_NONE, null];
+
+        foreach ($tests as $test) {
+            if ($test instanceof TestCase && Util::getInvisibleProperty($test, 'dependencies', 'hasDependencies')) {
+                return $testsOrderResult;
+            }
+        }
+
         foreach ($tests as $position => $test) {
-            if ($this->sortTest($test, $position, $orderedTests)) {
-                $areTestsReordered = true;
+            list($testOrderResult, $time) = $this->sortTest($test, $position, $orderedTests);
+            if ($testsOrderResult[0] < $testOrderResult) {
+                $testsOrderResult = [$testOrderResult, $time];
             }
         }
 
         $groups = Util::getInvisibleProperty($suite, 'groups', 'getGroupDetails');
-        $areGroupsReordered = false;
+        $groupsOrderResult = [static::SORT_NONE, null];
         foreach ($groups as $groupName => $group) {
 
-            $isGroupReordered = false;
-            $orderedGroup = $this->createQueue($group);
+            $groupOrderResult = [static::SORT_NONE, null];
+            $orderedGroup = new SegmentedQueue($group);
             foreach ($group as $position => $test) {
-                if ($this->sortTest($test, $position, $orderedGroup)) {
-                    $isGroupReordered = true;
+                list($testOrderResult, $time) = $this->sortTest($test, $position, $orderedGroup);
+                if ($groupOrderResult[0] < $testOrderResult) {
+                    $groupOrderResult = [$testOrderResult, $time];
                 }
             }
 
-            if ($isGroupReordered) {
+            if ($groupOrderResult[0] > static::SORT_NONE) {
                 $groups[$groupName] = iterator_to_array($orderedGroup);
-                $areGroupsReordered = true;
+
+                if ($groupsOrderResult[0] < $groupOrderResult[0]) {
+                    $groupsOrderResult = $groupOrderResult;
+                }
             }
         }
 
-        if ($areTestsReordered) {
+        if ($testsOrderResult[0] > static::SORT_NONE) {
             Util::setInvisibleProperty($suite, 'tests', iterator_to_array($orderedTests), 'setTests');
         }
 
-        if ($areGroupsReordered) {
+        if ($groupsOrderResult) {
             Util::setInvisibleProperty($suite, 'groups', $groups, 'setGroupDetails');
         }
 
-        return $areTestsReordered || $areGroupsReordered;
+        return $testsOrderResult[0] > $groupsOrderResult[0] ? $testsOrderResult : $groupsOrderResult;
     }
 
-    private function sortTest($test, $position, SplQueue $orderedTests)
+    private function sortTest($test, $position, SegmentedQueue $orderedTests)
     {
-        if (($test instanceof TestSuite && $this->sortTestSuite($test)) ||
-            ($test instanceof TestCase &&
-                !Util::getInvisibleProperty($test, 'dependencies', 'hasDependencies') &&
-                $this->isError($test)
-            )
-        ) {
+        if ($test instanceof TestSuite) {
 
-            unset($orderedTests[$position]);
-            $orderedTests->unshift($test);
+            list($result, $time) = $this->sortTestSuite($test);
 
-            return true;
+            if ($result === static::SORT_ERROR) {
+
+                $orderedTests->unknown[$position] = null;
+                $orderedTests->errors->push($test);
+
+            } elseif ($result === static::SORT_TIMING) {
+
+                $orderedTests->unknown[$position] = null;
+                $orderedTests->timed->insert($test, $time);
+
+            }
+
+            return [$result, $time];
         }
 
-        return false;
+        if ($test instanceof TestCase) {
+
+            if ($this->isError($test)) {
+
+                $orderedTests->unknown[$position] = null;
+                $orderedTests->errors->push($test);
+
+                return [static::SORT_ERROR, null];
+            }
+
+            if ($time = $this->getTime($test)) {
+
+                $orderedTests->unknown[$position] = null;
+                $orderedTests->timed->insert($test, $time);
+
+                return [static::SORT_TIMING, $time];
+            }
+        }
+
+        return [static::SORT_NONE, null];
+    }
+
+    private function getTime(TestCase $test)
+    {
+        $name = $test->getName();
+        $class = get_class($test);
+
+        foreach ($this->timings as $timing) {
+            if ($timing['class'] === $class && $timing['test'] === $name) {
+                return $timing['time'];
+            }
+        }
     }
 
     private function isError(TestCase $test)
