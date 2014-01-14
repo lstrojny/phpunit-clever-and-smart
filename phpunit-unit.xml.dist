@@ -9,6 +9,14 @@
     verbose="true"
     colors="true">
 
+    <listeners>
+        <listener class="PHPUnit\Runner\CleverAndSmart\TestListener">
+            <arguments>
+                <object class="PHPUnit\Runner\CleverAndSmart\Storage\Sqlite3Storage"/>
+            </arguments>
+        </listener>
+    </listeners>
+
     <testsuites>
         <testsuite name="integration">
             <directory>./tests/PHPUnit/Tests/Runner/CleverAndSmart/Unit</directory>

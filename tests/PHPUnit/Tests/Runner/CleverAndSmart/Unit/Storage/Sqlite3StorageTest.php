@@ -11,6 +11,9 @@ class Test extends TestCase
 
 class Sqlite3StorageTest extends TestCase
 {
+    /** @var string */
+    private $file;
+
     /** @var Sqlite3Storage */
     private $storage;
 
@@ -28,9 +31,10 @@ class Sqlite3StorageTest extends TestCase
 
     public function setUp()
     {
+        $this->file = __DIR__ . '.phpunit-cast.db';
         $this->reset();
 
-        $this->storage = new Sqlite3Storage();
+        $this->storage = new Sqlite3Storage($this->file);
         $this->test1 = new Test();
         $this->test1->setName('testMethod1');
         $this->test2 = new Test();
@@ -46,9 +50,8 @@ class Sqlite3StorageTest extends TestCase
 
     private function reset()
     {
-        $file = __DIR__ . '/../../../../../../../.phpunit-cas.db';
-        if (file_exists($file)) {
-            unlink($file);
+        if (file_exists($this->file)) {
+            unlink($this->file);
         }
     }
 

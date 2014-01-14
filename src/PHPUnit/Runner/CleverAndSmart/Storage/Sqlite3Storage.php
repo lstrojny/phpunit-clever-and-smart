@@ -19,9 +19,9 @@ class Sqlite3Storage implements StorageInterface
         return 'phpunit_' . static::SCHEMA_VERSION . '_';
     }
 
-    public function __construct()
+    public function __construct($fileName = '.phpunit-cas.db')
     {
-        $this->db = new SQLite3('.phpunit-cas.db');
+        $this->db = new SQLite3($fileName);
         $this->db->busyTimeout(1000 * 30);
         $this->query('PRAGMA foreign_keys = ON');
 

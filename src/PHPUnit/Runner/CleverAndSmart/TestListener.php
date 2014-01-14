@@ -96,7 +96,9 @@ class TestListener implements TestListenerInterface
             return;
         }
 
-        $this->storage->recordError($this->run, $this->currentTest);
+        if ($this->currentTest) {
+            $this->storage->recordError($this->run, $this->currentTest);
+        }
     }
 
     public function onCancel()
