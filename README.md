@@ -36,6 +36,14 @@ FSFS...........................................................  63 / 280 ( 22%)
 .........................
 ```
 
+## Installation
+
+add the following line to your projects' composer.json `require-dev` section.
+
+```
+"lstrojny/phpunit-clever-and-smart": "0.*"
+```
+
 ## Configuration
 To play around with it, add this to your `phpunit.xml(.dist)`
 ```
