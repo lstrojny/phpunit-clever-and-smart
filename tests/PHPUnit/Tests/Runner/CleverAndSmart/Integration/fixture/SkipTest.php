@@ -32,7 +32,7 @@ class SkipTest extends TestCase
 
     public function testSuccess2()
     {
-        usleep(4000);
+        usleep(5000);
         $this->assertTrue(true);
     }
 }
