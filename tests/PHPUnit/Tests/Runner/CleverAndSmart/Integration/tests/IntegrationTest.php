@@ -295,6 +295,38 @@ class IntegrationTest extends TestCase
         $this->assertTestPosition('retry', 'FatalErrorTest::testSuccess2', 3);
     }
 
+    public function testSkippedAndIncompleteTests()
+    {
+        $this->runTests('SkipTest', 'skip', 'skip', true, 'grp');
+        $this->runTests('SkipTest', 'success', 'success', true, 'grp');
+        $this->runTests('SkipTest', 'success', 'retry', true, 'grp');
+
+        $this->assertTestSuitePosition('skip', 'SkipTest', 6);
+        $this->assertTestSuiteResult('skip', 'SkipTest', 'tests', 2);
+        $this->assertTestSuiteResult('skip', 'SkipTest', 'failures', 0);
+        $this->assertTestSuiteResult('skip', 'SkipTest', 'errors', 0);
+        $this->assertTestPosition('skip', 'SkipTest::testSuccess1', 1);
+        $this->assertTestPosition('skip', 'SkipTest::testSuccess2', 2);
+
+        $this->assertTestSuitePosition('success', 'SkipTest', 1);
+        $this->assertTestSuiteResult('success', 'SkipTest', 'tests', 4);
+        $this->assertTestSuiteResult('success', 'SkipTest', 'failures', 0);
+        $this->assertTestSuiteResult('success', 'SkipTest', 'errors', 0);
+        $this->assertTestPosition('success', 'SkipTest::testSkipped', 1);
+        $this->assertTestPosition('success', 'SkipTest::testIncomplete', 2);
+        $this->assertTestPosition('success', 'SkipTest::testSuccess1', 3);
+        $this->assertTestPosition('success', 'SkipTest::testSuccess2', 4);
+
+        $this->assertTestSuitePosition('retry', 'SkipTest', 1);
+        $this->assertTestSuiteResult('retry', 'SkipTest', 'tests', 4);
+        $this->assertTestSuiteResult('retry', 'SkipTest', 'failures', 0);
+        $this->assertTestSuiteResult('retry', 'SkipTest', 'errors', 0);
+        $this->assertTestPosition('retry', 'SkipTest::testSkipped', 1);
+        $this->assertTestPosition('retry', 'SkipTest::testIncomplete', 2);
+        $this->assertTestPosition('retry', 'SkipTest::testSuccess1', 3);
+        $this->assertTestPosition('retry', 'SkipTest::testSuccess2', 4);
+    }
+
     private function runTests($testFile, $state, $runName, $expectedResult, $group = null)
     {
         $phpunit = realpath(__DIR__ . '/../../../../../../../vendor/bin/phpunit');

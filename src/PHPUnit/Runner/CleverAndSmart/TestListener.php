@@ -72,10 +72,12 @@ class TestListener implements TestListenerInterface
 
     public function addIncompleteTest(Test $test, Exception $e, $time)
     {
+        $this->storage->recordError($this->run, $test);
     }
 
     public function addSkippedTest(Test $test, Exception $e, $time)
     {
+        $this->storage->recordError($this->run, $test);
     }
 
     public function endTestSuite(TestSuite $suite)
