@@ -10,7 +10,7 @@ use SQLite3;
 
 class Sqlite3Storage implements StorageInterface
 {
-    const SCHEMA_VERSION = '0_2_0';
+    const SCHEMA_VERSION = '0_3_0';
 
     private $db;
 
@@ -24,6 +24,12 @@ class Sqlite3Storage implements StorageInterface
         $this->db = new SQLite3($fileName);
         $this->db->busyTimeout(1000 * 30);
         $this->query('PRAGMA foreign_keys = ON');
+        $this->query('PRAGMA page_size = 4096');
+        $this->query('PRAGMA cache_size = 10000');
+        $this->query('PRAGMA locking_mode = EXCLUSIVE');
+        $this->query('PRAGMA synchronous = OFF');
+        $this->query('PRAGMA journal_mode = MEMORY');
+
 
         $this->transactional(
             function () {
