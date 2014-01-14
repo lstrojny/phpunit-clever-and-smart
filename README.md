@@ -51,6 +51,5 @@ To play around with it, add this to your `phpunit.xml(.dist)`
 ## Roadmap
 
  - Test it with as many test suites as possible
- - Let the weight decline over time. The older a test failure is, the less likely it should be it is run first
- - Capture fatal errors through `register_shutdown_function()`
- - Handle `Ctrl+c` through signals
+ - Stabilize
+ - Merge into PHPUnit core
