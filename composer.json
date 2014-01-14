@@ -4,7 +4,7 @@
     "license": "MIT",
     "require": {
         "phpunit/phpunit": "3.*",
-        "ext-sqlite": "3.*"
+        "ext-sqlite3": "*"
     },
     "require-dev": {
         "symfony/process": "2.*"
