@@ -26,8 +26,8 @@ class SegmentedQueueTest extends TestCase
     {
         $this->queue->unknown->push('test1');
         $this->queue->timed->insert('test4', 0.1);
-        $this->queue->timed->insert('test3', 0.2);
-        $this->queue->timed->insert('test5', 0.05);
+        $this->queue->timed->insert('test5', 0.2);
+        $this->queue->timed->insert('test3', 0.05);
         $this->queue->unknown->push('test2');
 
         $this->assertSame(['test1', 'test2', 'test3', 'test4', 'test5'], iterator_to_array($this->queue));

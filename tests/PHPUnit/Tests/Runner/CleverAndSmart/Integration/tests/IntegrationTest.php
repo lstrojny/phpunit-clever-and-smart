@@ -14,7 +14,7 @@ class IntegrationTest extends TestCase
 
     public function tearDown()
     {
-        //$this->reset();
+        $this->reset();
     }
 
     private function reset()

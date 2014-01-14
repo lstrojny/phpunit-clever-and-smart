@@ -8,19 +8,19 @@ class SimpleTest extends TestCase
 {
     public function testSuccess()
     {
-        usleep(3);
+        usleep(1000);
         $this->assertTrue(PHPUNIT_RUNNER_CLEVERANDSMART_SUCCESS);
     }
 
     public function testFailure()
     {
-        usleep(2);
+        usleep(2000);
         $this->assertFalse(PHPUNIT_RUNNER_CLEVERANDSMART_FAILURE);
     }
 
     public function testError()
     {
-        usleep(1);
+        usleep(3000);
         if (PHPUNIT_RUNNER_CLEVERANDSMART_ERROR) {
             throw new \Exception();
         }

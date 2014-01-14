@@ -22,7 +22,7 @@ class SegmentedQueue implements IteratorAggregate
         $this->unknown = new SplQueue();
         array_map([$this->unknown, 'push'], $values);
         $this->errors = new SplQueue();
-        $this->timed = new SplPriorityQueue();
+        $this->timed = new PriorityQueue();
     }
 
     public function getIterator()

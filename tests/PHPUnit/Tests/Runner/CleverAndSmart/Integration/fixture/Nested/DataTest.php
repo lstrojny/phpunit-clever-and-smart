@@ -20,12 +20,12 @@ class DataTest extends TestCase
     {
         switch ($constant) {
             case 'PHPUNIT_RUNNER_CLEVERANDSMART_FAILURE':
-                usleep(3);
+                usleep(1000);
                 $this->assertFalse(PHPUNIT_RUNNER_CLEVERANDSMART_FAILURE);
                 break;
 
             case 'PHPUNIT_RUNNER_CLEVERANDSMART_ERROR':
-                usleep(2);
+                usleep(2000);
                 if (PHPUNIT_RUNNER_CLEVERANDSMART_ERROR) {
                     throw new \Exception('ERROR');
                 }
@@ -33,7 +33,7 @@ class DataTest extends TestCase
                 break;
 
             case PHPUNIT_RUNNER_CLEVERANDSMART_SUCCESS:
-                usleep(1);
+                usleep(3000);
                 $this->assertTrue(PHPUNIT_RUNNER_CLEVERANDSMART_SUCCESS);
                 break;
         }

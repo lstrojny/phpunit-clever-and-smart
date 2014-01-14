@@ -5,7 +5,7 @@ Enable fast feedback cycles by storing test case results in a database and reord
 following order:
   1. Failures and errors
   2. So far unrecorded tests
-  3. Remaining tests by execution time in descendant order (slowest first)
+  3. Remaining tests by execution time in ascendant order (fastest first)
 
 It’s probably not yet very stable but try it out.
 

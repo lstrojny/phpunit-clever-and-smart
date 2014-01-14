@@ -150,11 +150,11 @@ class PrioritySorterTest extends TestCase
 
         $this->assertSame('test2', $tests[0]->getName());
         $this->assertSame('test3', $tests[1]->getName());
-        $this->assertSame('test4', $tests[2]->getName());
-        $this->assertSame('test1', $tests[4]->getName());
-        $this->assertSame('suite2', $tests[3]->getName());
-        $this->assertSame('test2.2', $tests[3]->tests()[0]->getName());
-        $this->assertSame('test2.1', $tests[3]->tests()[1]->getName());
+        $this->assertSame('suite2', $tests[2]->getName());
+        $this->assertSame('test2.2', $tests[2]->tests()[0]->getName());
+        $this->assertSame('test2.1', $tests[2]->tests()[1]->getName());
+        $this->assertSame('test1', $tests[3]->getName());
+        $this->assertSame('test4', $tests[4]->getName());
     }
 
     public function testNestedSortingNoErrors()
