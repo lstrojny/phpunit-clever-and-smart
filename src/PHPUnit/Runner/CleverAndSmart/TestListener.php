@@ -11,6 +11,8 @@ use Exception;
 use ReflectionObject;
 use PHPUnit_Runner_BaseTestRunner as BaseTestRunner;
 
+declare(ticks=1);
+
 class TestListener implements TestListenerInterface
 {
     /** @var Run */
@@ -55,6 +57,9 @@ class TestListener implements TestListenerInterface
         $sorter = new PrioritySorter($this->storage->getErrors(), $this->storage->getTimings());
         $sorter->sort($suite);
         register_shutdown_function([$this, 'onFatalError']);
+        if (function_exists('pcntl_signal')) {
+            pcntl_signal(SIGINT, [$this, 'onCancel']);
+        }
     }
 
     public function startTest(Test $test)
@@ -92,5 +97,14 @@ class TestListener implements TestListenerInterface
         }
 
         $this->storage->recordError($this->run, $this->currentTest);
+    }
+
+    public function onCancel()
+    {
+        if ($this->currentTest) {
+            $this->storage->recordError($this->run, $this->currentTest);
+        }
+
+        exit(255);
     }
 }
