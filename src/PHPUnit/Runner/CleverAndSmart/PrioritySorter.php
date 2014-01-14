@@ -10,11 +10,11 @@ class PrioritySorter
     const SORT_TIMING = 1;
     const SORT_ERROR = 2;
 
-    private $errors = [];
+    private $errors = array();
 
-    private $timings = [];
+    private $timings = array();
 
-    public function __construct(array $errors, array $timings = [])
+    public function __construct(array $errors, array $timings = array())
     {
         $this->errors = $errors;
         $this->timings = $timings;
@@ -30,7 +30,7 @@ class PrioritySorter
         $tests = $suite->tests();
         $orderedTests = new SegmentedQueue($tests);
 
-        $testsOrderResult = [static::SORT_NONE, null];
+        $testsOrderResult = array(static::SORT_NONE, null);
 
         foreach ($tests as $test) {
             if ($test instanceof TestCase && Util::getInvisibleProperty($test, 'dependencies', 'hasDependencies')) {
@@ -41,20 +41,20 @@ class PrioritySorter
         foreach ($tests as $position => $test) {
             list($testOrderResult, $time) = $this->sortTest($test, $position, $orderedTests);
             if ($testsOrderResult[0] < $testOrderResult) {
-                $testsOrderResult = [$testOrderResult, $time];
+                $testsOrderResult = array($testOrderResult, $time);
             }
         }
 
         $groups = Util::getInvisibleProperty($suite, 'groups', 'getGroupDetails');
-        $groupsOrderResult = [static::SORT_NONE, null];
+        $groupsOrderResult = array(static::SORT_NONE, null);
         foreach ($groups as $groupName => $group) {
 
-            $groupOrderResult = [static::SORT_NONE, null];
+            $groupOrderResult = array(static::SORT_NONE, null);
             $orderedGroup = new SegmentedQueue($group);
             foreach ($group as $position => $test) {
                 list($testOrderResult, $time) = $this->sortTest($test, $position, $orderedGroup);
                 if ($groupOrderResult[0] < $testOrderResult) {
-                    $groupOrderResult = [$testOrderResult, $time];
+                    $groupOrderResult = array($testOrderResult, $time);
                 }
             }
 
@@ -96,7 +96,7 @@ class PrioritySorter
 
             }
 
-            return [$result, $time];
+            return array($result, $time);
         }
 
         if ($test instanceof TestCase) {
@@ -106,7 +106,7 @@ class PrioritySorter
                 $orderedTests->unknown[$position] = null;
                 $orderedTests->errors->push($test);
 
-                return [static::SORT_ERROR, null];
+                return array(static::SORT_ERROR, null);
             }
 
             if ($time = $this->getTime($test)) {
@@ -114,11 +114,11 @@ class PrioritySorter
                 $orderedTests->unknown[$position] = null;
                 $orderedTests->timed->insert($test, $time);
 
-                return [static::SORT_TIMING, $time];
+                return array(static::SORT_TIMING, $time);
             }
         }
 
-        return [static::SORT_NONE, null];
+        return array(static::SORT_NONE, null);
     }
 
     private function getTime(TestCase $test)
@@ -135,6 +135,6 @@ class PrioritySorter
 
     private function isError(TestCase $test)
     {
-        return in_array(['class' => get_class($test), 'test' => $test->getName()], $this->errors);
+        return in_array(array('class' => get_class($test), 'test' => $test->getName()), $this->errors);
     }
 }

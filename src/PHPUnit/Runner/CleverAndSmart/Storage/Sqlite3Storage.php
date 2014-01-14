@@ -22,88 +22,100 @@ class Sqlite3Storage implements StorageInterface
     public function __construct($fileName = '.phpunit-cas.db')
     {
         $this->db = new SQLite3($fileName);
-        $this->db->busyTimeout(1000 * 30);
+        
+        // method introduced in php 5.3.3
+        if (method_exists($this->db, 'busyTimeout')) {
+            $this->db->busyTimeout(1000 * 30);
+        }
+
+        // PRAGMA need to be set outside a transaction
         $this->query('PRAGMA foreign_keys = ON');
         $this->query('PRAGMA page_size = 4096');
         $this->query('PRAGMA cache_size = 10000');
         $this->query('PRAGMA locking_mode = EXCLUSIVE');
         $this->query('PRAGMA synchronous = OFF');
         $this->query('PRAGMA journal_mode = MEMORY');
-
-
-        $this->transactional(
-            function () {
-                $this->query(
-                    'CREATE TABLE IF NOT EXISTS {{prefix}}run (
-                        run_id CHAR(128) PRIMARY KEY,
-                        run_ran_at DOUBLE
-                    )'
-                );
-                $this->query(
-                    'CREATE TABLE IF NOT EXISTS {{prefix}}error (
-                        error_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        error_count INTEGER,
-                        error_class VARCHAR(1024),
-                        error_test VARCHAR(1024),
-                        UNIQUE (error_class, error_test) ON CONFLICT REPLACE
-                    )'
-                );
-                $this->query('CREATE INDEX IF NOT EXISTS {{prefix}}error_count_idx ON {{prefix}}error(error_count)');
-                $this->query(
-                    'CREATE TABLE IF NOT EXISTS {{prefix}}run_error (
-                        run_error_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        run_id CHAR(128),
-                        error_id INTEGER,
-                        UNIQUE (run_id, error_id),
-                        FOREIGN KEY (error_id) REFERENCES {{prefix}}error(error_id) ON DELETE CASCADE,
-                        FOREIGN KEY (error_id) REFERENCES {{prefix}}error(error_id) ON DELETE CASCADE
-                    )'
-                );
-                $this->query(
-                    'CREATE TABLE IF NOT EXISTS {{prefix}}success (
-                        success_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        success_time DOUBLE,
-                        success_class VARCHAR(1024),
-                        success_test VARCHAR(1024),
-                        success_identifier CHAR(128)
-                    )'
-                );
-                $this->query(
-                    'CREATE INDEX IF NOT EXISTS {{prefix}}success_time_idx ON {{prefix}}success(success_time)'
-                );
-                $this->query(
-                    'CREATE TABLE IF NOT EXISTS {{prefix}}run_success (
-                        run_success_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        run_id CHAR(128),
-                        success_id INTEGER,
-                        UNIQUE (run_id, success_id),
-                        FOREIGN KEY (success_id) REFERENCES {{prefix}}success(success_id) ON DELETE CASCADE,
-                        FOREIGN KEY (success_id) REFERENCES {{prefix}}success(success_id)  ON DELETE CASCADE
-                    )'
-                );
-            }
-        );
+        
+        $this->transactional(array($this, 'init'));
     }
+    
+    public function init()
+    {
+        $this->query(
+            'CREATE TABLE IF NOT EXISTS {{prefix}}run (
+                    run_id CHAR(128) PRIMARY KEY,
+                    run_ran_at DOUBLE
+            )'
+        );
+        $this->query(
+            'CREATE TABLE IF NOT EXISTS {{prefix}}error (
+                    error_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    error_count INTEGER,
+                    error_class VARCHAR(1024),
+                    error_test VARCHAR(1024),
+                    UNIQUE (error_class, error_test) ON CONFLICT REPLACE
+            )'
+        );
+        $this->query('CREATE INDEX IF NOT EXISTS {{prefix}}error_count_idx ON {{prefix}}error(error_count)');
+        $this->query(
+            'CREATE TABLE IF NOT EXISTS {{prefix}}run_error (
+                    run_error_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    run_id CHAR(128),
+                    error_id INTEGER,
+                    UNIQUE (run_id, error_id),
+                    FOREIGN KEY (error_id) REFERENCES {{prefix}}error(error_id) ON DELETE CASCADE,
+                    FOREIGN KEY (error_id) REFERENCES {{prefix}}error(error_id) ON DELETE CASCADE
+            )'
+        );
+        $this->query(
+            'CREATE TABLE IF NOT EXISTS {{prefix}}success (
+                    success_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    success_time DOUBLE,
+                    success_class VARCHAR(1024),
+                    success_test VARCHAR(1024),
+                    success_identifier CHAR(128)
+            )'
+        );
+        $this->query(
+            'CREATE INDEX IF NOT EXISTS {{prefix}}success_time_idx ON {{prefix}}success(success_time)'
+        );
+        $this->query(
+            'CREATE TABLE IF NOT EXISTS {{prefix}}run_success (
+                    run_success_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    run_id CHAR(128),
+                    success_id INTEGER,
+                    UNIQUE (run_id, success_id),
+                    FOREIGN KEY (success_id) REFERENCES {{prefix}}success(success_id) ON DELETE CASCADE,
+                    FOREIGN KEY (success_id) REFERENCES {{prefix}}success(success_id)  ON DELETE CASCADE
+            )'
+        );
+    }    
 
     public function recordSuccess(Run $run, TestCase $test, $time)
     {
         $this->transactional(
-            function () use ($run, $test, $time) {
-                $this->storeRun($run);
-                $this->updateErrorCount($test, false);
-                $this->insertSuccess($run, $test, $time);
-            }
+            array($this, 'doRecordSuccess'), $run, $test, $time
         );
+    }
+    
+    public function doRecordSuccess($run, $test, $time)
+    {
+        $this->storeRun($run);
+        $this->updateErrorCount($test, false);
+        $this->insertSuccess($run, $test, $time);
     }
 
     public function recordError(Run $run, TestCase $test)
     {
         $this->transactional(
-            function () use ($run, $test) {
-                $this->storeRun($run);
-                $this->insertError($run, $test);
-            }
+            array($this, 'doRecordError'), $run, $test
         );
+    }
+    
+    public function doRecordError($run, $test)
+    {
+        $this->storeRun($run);
+        $this->insertError($run, $test);
     }
 
     public function getErrors()
@@ -124,12 +136,15 @@ class Sqlite3Storage implements StorageInterface
         );
     }
 
-    private function transactional(Closure $callable)
+    private function transactional($callable /*, ... $args */)
     {
         $this->query('BEGIN');
 
+        $args = func_get_args();
+        array_shift($args);
+        
         try {
-            $result = $callable();
+            $result = call_user_func_array($callable, $args);
         } catch (Exception $e) {
             $this->query('ROLLBACK');
             throw $e;
@@ -145,7 +160,7 @@ class Sqlite3Storage implements StorageInterface
         $this->query(
             "INSERT OR IGNORE INTO {{prefix}}error (error_class, error_test, error_count)
             VALUES ('%s', '%s', %d)",
-            [get_class($test), $test->getName(), 0]
+            array(get_class($test), $test->getName(), 0)
         );
         $errorId = $this->updateErrorCount($test, true);
         $this->storeErrorRelation($run, $errorId);
@@ -160,7 +175,7 @@ class Sqlite3Storage implements StorageInterface
         $this->query(
             "INSERT INTO {{prefix}}success (success_class, success_test, success_identifier, success_time)
             VALUES ('%s', '%s', '%s', %F)",
-            [$className, $testName, $identifier, $time]
+            array($className, $testName, $identifier, $time)
         );
 
         $this->storeSuccessRelation($run, $this->db->lastInsertRowID());
@@ -172,12 +187,12 @@ class Sqlite3Storage implements StorageInterface
             "UPDATE {{prefix}}error
             SET error_count = error_count %s 1
             WHERE error_class = '%s' AND error_test = '%s'",
-            [($increment ? '+' : '-'), get_class($test), $test->getName()]
+            array(($increment ? '+' : '-'), get_class($test), $test->getName())
         );
 
         $errorId = $this->selectOne(
             "SELECT error_id FROM {{prefix}}error WHERE error_class = '%s' AND error_test = '%s'",
-            [get_class($test), $test->getName()]
+            array(get_class($test), $test->getName())
         );
 
         $this->query('DELETE FROM {{prefix}}error WHERE error_count <= -4');
@@ -189,7 +204,7 @@ class Sqlite3Storage implements StorageInterface
     {
         $this->query(
             "INSERT OR IGNORE INTO {{prefix}}run_error (run_id, error_id) VALUES ('%s', %d)",
-            [$run->getRunId(), $errorId]
+            array($run->getRunId(), $errorId)
         );
     }
 
@@ -197,7 +212,7 @@ class Sqlite3Storage implements StorageInterface
     {
         $this->query(
             "INSERT OR IGNORE INTO {{prefix}}run_success (run_id, success_id) VALUES ('%s', %d)",
-            [$run->getRunId(), $successId]
+            array($run->getRunId(), $successId)
         );
     }
 
@@ -205,23 +220,23 @@ class Sqlite3Storage implements StorageInterface
     {
         $this->query(
             "INSERT OR IGNORE INTO {{prefix}}run (run_id, run_ran_at) VALUES ('%s', '%s')",
-            [$run->getRunId(), $run->getRanAt()->format('U.u')]
+            array($run->getRunId(), $run->getRanAt()->format('U.u'))
         );
     }
 
-    private function query($query, array $params = [])
+    public function query($query, array $params = array())
     {
         $query = $this->prepareQuery($query, $params);
 
         $this->doQuery($query);
     }
 
-    private function select($query, array $params = [])
+    private function select($query, array $params = array())
     {
         $query = $this->prepareQuery($query, $params);
         $result = $this->doQuery($query);
 
-        $rows = [];
+        $rows = array();
         while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
             $rows[] = $row;
         }
@@ -253,6 +268,6 @@ class Sqlite3Storage implements StorageInterface
     {
         $query = str_replace('{{prefix}}', $this->getPrefix(), $query);
 
-        return vsprintf($query, array_map([$this->db, 'escapeString'], $params));
+        return vsprintf($query, array_map(array($this->db, 'escapeString'), $params));
     }
 }
