@@ -19,6 +19,9 @@ class TestListener implements TestListenerInterface
     /** @var StorageInterface */
     private $storage;
 
+    /** @var TestCase */
+    private $currentTest;
+
     /** @var bool */
     private $reordered = false;
 
@@ -47,13 +50,21 @@ class TestListener implements TestListenerInterface
         if ($this->reordered) {
             return;
         }
+
         $this->reordered = true;
         $sorter = new PrioritySorter($this->storage->getErrors(), $this->storage->getTimings());
         $sorter->sort($suite);
+        register_shutdown_function([$this, 'onFatalError']);
+    }
+
+    public function startTest(Test $test)
+    {
+        $this->currentTest = $test;
     }
 
     public function endTest(Test $test, $time)
     {
+        $this->currentTest = null;
         if ($test instanceof TestCase && $test->getStatus() === 0) {
             $this->storage->recordSuccess($this->run, $test, $time);
         }
@@ -71,7 +82,13 @@ class TestListener implements TestListenerInterface
     {
     }
 
-    public function startTest(Test $test)
+    public function onFatalError()
     {
+        $error = error_get_last();
+        if (!$error || $error['type'] !== E_ERROR) {
+            return;
+        }
+
+        $this->storage->recordError($this->run, $this->currentTest);
     }
 }

@@ -22,6 +22,7 @@
     </testsuites>
 
     <php>
+        <const name="PHPUNIT_RUNNER_CLEVERANDSMART_FATAL" value="false"/>
         <const name="PHPUNIT_RUNNER_CLEVERANDSMART_FAILURE" value="false"/>
         <const name="PHPUNIT_RUNNER_CLEVERANDSMART_ERROR" value="false"/>
         <const name="PHPUNIT_RUNNER_CLEVERANDSMART_SUCCESS" value="true"/>

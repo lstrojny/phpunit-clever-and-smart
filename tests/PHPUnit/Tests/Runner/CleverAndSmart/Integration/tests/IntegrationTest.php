@@ -31,7 +31,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true);
         $this->runTests('SimpleTest', 'success', 'retry', true);
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', 4);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 5);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 0);
@@ -62,7 +62,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true);
         $this->runTests('SimpleTest', 'success', 'retry', true);
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', 4);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 5);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 0);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
@@ -93,7 +93,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true);
         $this->runTests('SimpleTest', 'success', 'retry', true);
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', 4);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 5);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
@@ -124,7 +124,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true, 'grp');
         $this->runTests('SimpleTest', 'success', 'retry', true, 'grp');
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', 4);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 5);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 0);
@@ -155,7 +155,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true, 'grp');
         $this->runTests('SimpleTest', 'success', 'retry', true, 'grp');
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', 4);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 5);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 0);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
@@ -186,7 +186,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true, 'grp');
         $this->runTests('SimpleTest', 'success', 'retry', true, 'grp');
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', 4);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', 5);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
@@ -270,6 +270,29 @@ class IntegrationTest extends TestCase
         $this->assertTestPosition('retry', 'DependentTest::testSuccess', 1);
         $this->assertTestPosition('retry', 'DependentTest::testFailure', 2);
         $this->assertTestPosition('retry', 'DependentTest::testError', 3);
+    }
+
+    public function testFatalError()
+    {
+        $this->runTests('FatalErrorTest', 'fatal', 'fatal', false, 'grp');
+        $this->runTests('FatalErrorTest', 'success', 'success', true, 'grp');
+        $this->runTests('FatalErrorTest', 'success', 'retry', true, 'grp');
+
+        $this->assertTestSuitePosition('success', 'FatalErrorTest', 1);
+        $this->assertTestSuiteResult('success', 'FatalErrorTest', 'tests', 3);
+        $this->assertTestSuiteResult('success', 'FatalErrorTest', 'failures', 0);
+        $this->assertTestSuiteResult('success', 'FatalErrorTest', 'errors', 0);
+        $this->assertTestPosition('success', 'FatalErrorTest::testFatal', 1);
+        $this->assertTestPosition('success', 'FatalErrorTest::testSuccess2', 2);
+        $this->assertTestPosition('success', 'FatalErrorTest::testSuccess1', 3);
+
+        $this->assertTestSuitePosition('retry', 'FatalErrorTest', 1);
+        $this->assertTestSuiteResult('retry', 'FatalErrorTest', 'tests', 3);
+        $this->assertTestSuiteResult('retry', 'FatalErrorTest', 'failures', 0);
+        $this->assertTestSuiteResult('retry', 'FatalErrorTest', 'errors', 0);
+        $this->assertTestPosition('retry', 'FatalErrorTest::testFatal', 1);
+        $this->assertTestPosition('retry', 'FatalErrorTest::testSuccess1', 2);
+        $this->assertTestPosition('retry', 'FatalErrorTest::testSuccess2', 3);
     }
 
     private function runTests($testFile, $state, $runName, $expectedResult, $group = null)
