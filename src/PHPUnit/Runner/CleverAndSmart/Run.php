@@ -8,13 +8,13 @@ class Run
     /** @var string */
     private $runId;
 
-    /** @var DateTime */
+    /** @var float */
     private $ranAt;
 
-    public function __construct($runId = null, DateTime $ranAt = null)
+    public function __construct($runId = null, $ranAt = null)
     {
         $this->runId = $runId ?: Util::createRunId();
-        $this->ranAt = $ranAt ?: DateTime::createFromFormat('U.u', microtime(true));
+        $this->ranAt = $ranAt ?: microtime(true);
     }
 
     /**
@@ -26,7 +26,7 @@ class Run
     }
 
     /**
-     * @return DateTime
+     * @return float
      */
     public function getRanAt()
     {
