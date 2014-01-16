@@ -413,7 +413,8 @@ class IntegrationTest extends TestCase
     {
         static::assertXpathNotEmpty($xml, $xpath);
         $xml = new SimpleXMLElement($xml);
-        static::assertEquals($expectedValue, (string) $xml->xpath($xpath)[0]);
+        $elements = $xml->xpath($xpath);
+        static::assertEquals($expectedValue, (string)$elements [0]);
     }
 
     private static function getResultFilePath($runName)

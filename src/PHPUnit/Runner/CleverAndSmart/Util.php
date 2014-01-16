@@ -71,7 +71,7 @@ final class Util
     {
         $reflected = new ReflectionObject($object);
 
-        $classHierarchy = [];
+        $classHierarchy = array();
 
         do {
             try {

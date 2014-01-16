@@ -79,10 +79,10 @@ class Sqlite3StorageTest extends TestCase
         $this->storage->recordError($this->run2, $this->test2);
 
         $this->assertSame(
-            [
-                ['class' => 'PHPUnit\Runner\CleverAndSmart\Unit\Storage\Test', 'test' => 'testMethod2'],
-                ['class' => 'PHPUnit\Runner\CleverAndSmart\Unit\Storage\Test', 'test' => 'testMethod1'],
-            ],
+            array(
+                array('class' => 'PHPUnit\Runner\CleverAndSmart\Unit\Storage\Test', 'test' => 'testMethod2'),
+                array('class' => 'PHPUnit\Runner\CleverAndSmart\Unit\Storage\Test', 'test' => 'testMethod1'),
+            ),
             $this->storage->getErrors()
         );
     }
@@ -95,10 +95,10 @@ class Sqlite3StorageTest extends TestCase
         $this->storage->recordSuccess($this->run2, $this->test2, 2);
         $this->assertEmpty($this->storage->getErrors());
         $this->assertSame(
-            [
-                ['class' => 'PHPUnit\Runner\CleverAndSmart\Unit\Storage\Test', 'test' => 'testMethod2', 'time' => 2.0],
-                ['class' => 'PHPUnit\Runner\CleverAndSmart\Unit\Storage\Test', 'test' => 'testMethod1', 'time' => 1.5],
-            ],
+            array(
+                array('class' => 'PHPUnit\Runner\CleverAndSmart\Unit\Storage\Test', 'test' => 'testMethod2', 'time' => 2.0),
+                array('class' => 'PHPUnit\Runner\CleverAndSmart\Unit\Storage\Test', 'test' => 'testMethod1', 'time' => 1.5),
+            ),
             $this->storage->getTimings()
         );
     }

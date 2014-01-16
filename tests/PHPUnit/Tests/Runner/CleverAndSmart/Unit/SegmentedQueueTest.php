@@ -19,7 +19,7 @@ class SegmentedQueueTest extends TestCase
         $this->queue->unknown->push('test1');
         $this->queue->unknown->push('test2');
 
-        $this->assertSame(['test1', 'test2'], iterator_to_array($this->queue));
+        $this->assertSame(array('test1', 'test2'), iterator_to_array($this->queue));
     }
 
     public function testPushWithPriority()
@@ -30,7 +30,7 @@ class SegmentedQueueTest extends TestCase
         $this->queue->timed->insert('test3', 0.05);
         $this->queue->unknown->push('test2');
 
-        $this->assertSame(['test1', 'test2', 'test3', 'test4', 'test5'], iterator_to_array($this->queue));
+        $this->assertSame(array('test1', 'test2', 'test3', 'test4', 'test5'), iterator_to_array($this->queue));
     }
 
     public function testResetWithNull()
@@ -39,6 +39,6 @@ class SegmentedQueueTest extends TestCase
         $this->queue->unknown->push('test2');
         $this->queue->unknown[0] = null;
 
-        $this->assertSame(['test2'], iterator_to_array($this->queue));
+        $this->assertSame(array('test2'), iterator_to_array($this->queue));
     }
 }

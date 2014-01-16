@@ -56,9 +56,9 @@ class TestListener implements TestListenerInterface
         $this->reordered = true;
         $sorter = new PrioritySorter($this->storage->getErrors(), $this->storage->getTimings());
         $sorter->sort($suite);
-        register_shutdown_function([$this, 'onFatalError']);
+        register_shutdown_function(array($this, 'onFatalError'));
         if (function_exists('pcntl_signal')) {
-            pcntl_signal(SIGINT, [$this, 'onCancel']);
+            pcntl_signal(SIGINT, array($this, 'onCancel'));
         }
     }
 

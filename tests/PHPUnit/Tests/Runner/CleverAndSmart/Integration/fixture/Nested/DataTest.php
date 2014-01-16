@@ -8,11 +8,11 @@ class DataTest extends TestCase
 {
     public static function provideData()
     {
-        return [
-            ['PHPUNIT_RUNNER_CLEVERANDSMART_FAILURE'],
-            ['PHPUNIT_RUNNER_CLEVERANDSMART_ERROR'],
-            ['PHPUNIT_RUNNER_CLEVERANDSMART_SUCCESS'],
-        ];
+        return array(
+            array('PHPUNIT_RUNNER_CLEVERANDSMART_FAILURE'),
+            array('PHPUNIT_RUNNER_CLEVERANDSMART_ERROR'),
+            array('PHPUNIT_RUNNER_CLEVERANDSMART_SUCCESS'),
+        );
     }
 
     /** @dataProvider provideData */

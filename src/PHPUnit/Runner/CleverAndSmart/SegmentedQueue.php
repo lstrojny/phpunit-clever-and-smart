@@ -17,10 +17,10 @@ class SegmentedQueue implements IteratorAggregate
     /** @var SplPriorityQueue */
     public $timed;
 
-    public function __construct(array $values = [])
+    public function __construct(array $values = array())
     {
         $this->unknown = new SplQueue();
-        array_map([$this->unknown, 'push'], $values);
+        array_map(array($this->unknown, 'push'), $values);
         $this->errors = new SplQueue();
         $this->timed = new PriorityQueue();
     }
