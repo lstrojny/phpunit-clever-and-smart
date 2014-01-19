@@ -148,7 +148,7 @@ class UtilTest extends TestCase
     {
         $this->setExpectedException(
             'PHPUnit\Runner\CleverAndSmart\Exception\PropertyReflectionException',
-            'Property invalidProperty does not exist in hierarchy PHPUnit\Runner\CleverAndSmart\Unit\Child < PHPUnit\Runner\CleverAndSmart\Unit\Mother'
+            'Property "invalidProperty" does not exist in hierarchy PHPUnit\Runner\CleverAndSmart\Unit\Child < PHPUnit\Runner\CleverAndSmart\Unit\Mother'
         );
         Util::getInvisibleProperty(new Child(), 'invalidProperty');
     }
@@ -157,7 +157,7 @@ class UtilTest extends TestCase
     {
         $this->setExpectedException(
             'PHPUnit\Runner\CleverAndSmart\Exception\PropertyReflectionException',
-            'Property invalidProperty does not exist in hierarchy PHPUnit\Runner\CleverAndSmart\Unit\Child < PHPUnit\Runner\CleverAndSmart\Unit\Mother'
+            'Property "invalidProperty" does not exist in hierarchy PHPUnit\Runner\CleverAndSmart\Unit\Child < PHPUnit\Runner\CleverAndSmart\Unit\Mother'
         );
         Util::setInvisibleProperty(new Child(), 'invalidProperty', 'value');
     }

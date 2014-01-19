@@ -5,10 +5,14 @@ use ReflectionException as BaseReflectionException;
 
 class PropertyReflectionException extends BaseReflectionException
 {
-    public static function propertyNotExistsInHierarchy(BaseReflectionException $exception, array $classHierarchy)
+    public static function propertyNotExistsInHierarchy(
+        $propertyName,
+        BaseReflectionException $exception,
+        array $classHierarchy
+    )
     {
         return new static(
-            $exception->getMessage() . ' in hierarchy ' . implode(' < ', $classHierarchy),
+            sprintf('Property "%s" does not exists in hierarchy %s', $propertyName, implode(' < ', $classHierarchy)),
             null,
             $exception
         );

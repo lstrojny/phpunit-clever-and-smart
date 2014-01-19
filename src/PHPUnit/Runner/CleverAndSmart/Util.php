@@ -84,7 +84,7 @@ final class Util
             } catch (ReflectionException $e) {
 
                 $classHierarchy[] = $reflected->getName();
-                $e = PropertyReflectionException::propertyNotExistsInHierarchy($e, $classHierarchy);
+                $e = PropertyReflectionException::propertyNotExistsInHierarchy($propertyName, $e, $classHierarchy);
 
             }
         } while ($reflected = $reflected->getParentClass());
