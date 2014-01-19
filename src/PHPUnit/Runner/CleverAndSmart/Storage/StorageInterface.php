@@ -26,10 +26,11 @@ interface StorageInterface
     public function record(Run $run, TestCase $test, $time, $status);
 
     /**
-     * Get recorded test errors
+     * Fetch records, filtered by type. Use the StorageInterface::STATUS_* constants to define the type.
      *
-     * @param array $results
+     * @param array $types Types to filter
+     * @param boolean $includeTime Flag whether the result time should also be fetched
      * @return array
      */
-    public function getRecordings(array $results);
+    public function getRecordings(array $types, $includeTime = true);
 }
