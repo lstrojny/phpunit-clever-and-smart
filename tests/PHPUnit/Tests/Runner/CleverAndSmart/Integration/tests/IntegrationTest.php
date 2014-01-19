@@ -331,7 +331,7 @@ class IntegrationTest extends TestCase
     {
         $phpunit = realpath(__DIR__ . '/../../../../../../../vendor/bin/phpunit');
 
-        $commandString = PHP_BINARY;
+        $commandString = defined('PHP_BINARY') ? PHP_BINARY : 'php';
         if (strpos($commandString, 'hhvm') === false) {
             $commandString .= ' -d error_log=/tmp/dev.log';
         }
