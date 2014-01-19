@@ -330,8 +330,13 @@ class IntegrationTest extends TestCase
     private function runTests($testFile, $state, $runName, $expectedResult, $group = null)
     {
         $phpunit = realpath(__DIR__ . '/../../../../../../../vendor/bin/phpunit');
-        $commandString = 'php -d error_log=/tmp/dev.log '
-            . $phpunit
+
+        $commandString = PHP_BINARY;
+        if (strpos($commandString, 'hhvm') === false) {
+            $commandString .= ' -d error_log=/tmp/dev.log';
+        }
+
+        $commandString .= ' ' . $phpunit
             . ' --configuration ' . __DIR__ . '/../phpunit-%s.xml'
             . ' --log-junit ' . __DIR__ . '/../result-' . $runName . '.xml'
             . ' --filter ' . $testFile;
@@ -389,14 +394,10 @@ class IntegrationTest extends TestCase
     private static function assertTestSuiteResult($runName, $class, $attribute, $expectedValue)
     {
         $resultFilePath = static::getResultFilePath($runName);
-        $expression = sprintf(
-            '//testsuite[contains(@name, "%s")]/@%s',
-            $class,
-            $attribute
-        );
+        $expression = sprintf('//testsuite[contains(@name, "%s")]', $class);
 
         $xml = file_get_contents($resultFilePath);
-        static::assertXpathEquals($xml, $expression, $expectedValue);
+        static::assertXpathEquals($xml, $expression, $expectedValue, $attribute);
     }
 
     private static function assertXpathNotEmpty($xml, $xpath, $comment = null)
@@ -409,12 +410,15 @@ class IntegrationTest extends TestCase
         );
     }
 
-    private static function assertXpathEquals($xml, $xpath, $expectedValue, $comment = null)
+    private static function assertXpathEquals($xml, $xpath, $expectedValue, $attribute = null, $comment = null)
     {
         static::assertXpathNotEmpty($xml, $xpath);
         $xml = new SimpleXMLElement($xml);
-        $elements = $xml->xpath($xpath);
-        static::assertEquals($expectedValue, (string)$elements [0]);
+        $element = current($xml->xpath($xpath));
+        if ($attribute) {
+            $element = $element[$attribute];
+        }
+        static::assertEquals($expectedValue, (string) $element);
     }
 
     private static function getResultFilePath($runName)
