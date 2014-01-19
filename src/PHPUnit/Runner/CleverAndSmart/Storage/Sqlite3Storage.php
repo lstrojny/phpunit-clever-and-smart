@@ -88,7 +88,7 @@ class Sqlite3Storage implements StorageInterface
                 ORDER BY COUNT(*) DESC';
 
         if ($includeTime) {
-            $query = 'SELECT result_class AS class, result_test AS test, result_time AS time ' . $query;
+            $query = 'SELECT result_class AS class, result_test AS test, AVG(result_time) AS time ' . $query;
         } else {
             $query = 'SELECT result_class AS class, result_test AS test ' . $query;
         }
@@ -197,7 +197,7 @@ class Sqlite3Storage implements StorageInterface
 
         $escapedParams = array();
         foreach ($params as $param) {
-            if (is_string($param)) {
+            if (is_string($param) || is_object($param)) {
                 $escapedParams[] = $this->db->escapeString($param);
             } elseif (is_array($param)) {
                 $escapedParams[] = "'" . join("', '", array_map(array($this->db, 'escapeString'), $param)) . "'";

@@ -84,6 +84,7 @@ class Sqlite3StorageTest extends TestCase
     {
         $this->assertEmpty($this->storage->getRecordings(array($type)));
         $this->storage->record($this->run1, $this->test1, 1000, $type);
+        $this->storage->record($this->run1, $this->test1, 2000, $type);
         $recordings = $this->storage->getRecordings(array($type));
         $this->assertNotEmpty($recordings);
 
@@ -91,6 +92,7 @@ class Sqlite3StorageTest extends TestCase
         $this->assertArrayHasKey('class', $recordings[0]);
         $this->assertArrayHasKey('test', $recordings[0]);
         $this->assertArrayHasKey('time', $recordings[0]);
+        $this->assertSame(1500.0, $recordings[0]['time']);
 
         $recordings = $this->storage->getRecordings(array($type), false);
         $this->assertCount(2, $recordings[0]);
