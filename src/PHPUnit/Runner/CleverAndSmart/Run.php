@@ -20,7 +20,7 @@ class Run
     /**
      * @return string
      */
-    public function getRunId()
+    public function getRunIdentifier()
     {
         return $this->runId;
     }

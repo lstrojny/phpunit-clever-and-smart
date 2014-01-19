@@ -8,8 +8,7 @@ use PHPUnit_Framework_TestCase as TestCase;
 use PHPUnit_Framework_TestSuite as TestSuite;
 use PHPUnit_Framework_AssertionFailedError as AssertionFailedError;
 use Exception;
-use ReflectionObject;
-use PHPUnit_Runner_BaseTestRunner as BaseTestRunner;
+use PHPUnit_Runner_BaseTestRunner as TestRunner;
 
 declare(ticks=1);
 
@@ -35,12 +34,12 @@ class TestListener implements TestListenerInterface
 
     public function addError(Test $test, Exception $e, $time)
     {
-        $this->storage->recordError($this->run, $test);
+        $this->storage->record($this->run, $test, $time, StorageInterface::STATUS_ERROR);
     }
 
     public function addFailure(Test $test, AssertionFailedError $e, $time)
     {
-        $this->storage->recordError($this->run, $test);
+        $this->storage->record($this->run, $test, $time, StorageInterface::STATUS_ERROR);
     }
 
     public function addRiskyTest(Test $test, Exception $e, $time)
@@ -52,14 +51,37 @@ class TestListener implements TestListenerInterface
         if ($this->reordered) {
             return;
         }
-
         $this->reordered = true;
-        $sorter = new PrioritySorter($this->storage->getErrors(), $this->storage->getTimings());
-        $sorter->sort($suite);
+
+        $this->sort($suite);
+
         register_shutdown_function(array($this, 'onFatalError'));
         if (function_exists('pcntl_signal')) {
             pcntl_signal(SIGINT, array($this, 'onCancel'));
         }
+    }
+
+    private function sort(TestSuite $suite)
+    {
+        $sorter = new PrioritySorter(
+            $this->storage->getRecordings(
+                array(
+                    StorageInterface::STATUS_ERROR,
+                    StorageInterface::STATUS_FAILURE,
+                    StorageInterface::STATUS_CANCEL,
+                    StorageInterface::STATUS_FATAL_ERROR,
+                    StorageInterface::STATUS_SKIPPED,
+                    StorageInterface::STATUS_INCOMPLETE,
+                ),
+                false
+            ),
+            $this->storage->getRecordings(
+                array(
+                    StorageInterface::STATUS_PASSED,
+                )
+            )
+        );
+        $sorter->sort($suite);
     }
 
     public function startTest(Test $test)
@@ -70,19 +92,19 @@ class TestListener implements TestListenerInterface
     public function endTest(Test $test, $time)
     {
         $this->currentTest = null;
-        if ($test instanceof TestCase && $test->getStatus() === 0) {
-            $this->storage->recordSuccess($this->run, $test, $time);
+        if ($test instanceof TestCase && $test->getStatus() === TestRunner::STATUS_PASSED) {
+            $this->storage->record($this->run, $test, $time, StorageInterface::STATUS_PASSED);
         }
     }
 
     public function addIncompleteTest(Test $test, Exception $e, $time)
     {
-        $this->storage->recordError($this->run, $test);
+        $this->storage->record($this->run, $test, $time, StorageInterface::STATUS_INCOMPLETE);
     }
 
     public function addSkippedTest(Test $test, Exception $e, $time)
     {
-        $this->storage->recordError($this->run, $test);
+        $this->storage->record($this->run, $test, $time, StorageInterface::STATUS_SKIPPED);
     }
 
     public function endTestSuite(TestSuite $suite)
@@ -92,20 +114,20 @@ class TestListener implements TestListenerInterface
     public function onFatalError()
     {
         $error = error_get_last();
-        if (!$error || $error['type'] !== E_ERROR) {
+        if (!$error || $error['type'] !== E_ERROR || !$this->currentTest) {
             return;
         }
 
-        if ($this->currentTest) {
-            $this->storage->recordError($this->run, $this->currentTest);
-        }
+        $this->storage->record($this->run, $this->currentTest, 0, StorageInterface::STATUS_FATAL_ERROR);
     }
 
     public function onCancel()
     {
-        if ($this->currentTest) {
-            $this->storage->recordError($this->run, $this->currentTest);
+        if (!$this->currentTest) {
+            return;
         }
+
+        $this->storage->record($this->run, $this->currentTest, 0, StorageInterface::STATUS_CANCEL);
 
         exit(255);
     }

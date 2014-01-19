@@ -3,7 +3,9 @@ namespace PHPUnit\Runner\CleverAndSmart\Unit\Storage;
 
 use PHPUnit\Runner\CleverAndSmart\Run;
 use PHPUnit\Runner\CleverAndSmart\Storage\Sqlite3Storage;
+use PHPUnit\Runner\CleverAndSmart\Storage\StorageInterface;
 use PHPUnit_Framework_TestCase as TestCase;
+use ReflectionClass;
 
 class Test extends TestCase
 {
@@ -31,7 +33,7 @@ class Sqlite3StorageTest extends TestCase
 
     public function setUp()
     {
-        $this->file = __DIR__ . '.phpunit-cast.db';
+        $this->file = __DIR__ . '/.phpunit-cas-test.db';
         $this->reset();
 
         $this->storage = new Sqlite3Storage($this->file);
@@ -55,69 +57,80 @@ class Sqlite3StorageTest extends TestCase
         }
     }
 
-    public function testRecordSuccess()
+    public static function getTypes()
     {
-        $this->assertEmpty($this->storage->getErrors());
-        $this->storage->recordSuccess($this->run1, $this->test1, 1000);
-        $this->assertEmpty($this->storage->getErrors());
+        $class = new ReflectionClass('PHPUnit\Runner\CleverAndSmart\Storage\StorageInterface');
+
+        $types = array();
+        foreach ($class->getConstants() as $name => $value) {
+            $types[] = array($value, $name);
+        }
+
+        return $types;
     }
 
-    public function testRecordError()
+    public static function getErrorTypes()
     {
-        $this->assertEmpty($this->storage->getErrors());
-        $this->storage->recordError($this->run1, $this->test1);
-        $this->assertNotEmpty($this->storage->getErrors());
+        return array(
+            array(StorageInterface::STATUS_FAILURE, 'STATUS_FAILURE'),
+            array(StorageInterface::STATUS_ERROR, 'STATUS_ERROR'),
+            array(StorageInterface::STATUS_FATAL_ERROR, 'STATUS_FATAL_ERROR'),
+            array(StorageInterface::STATUS_CANCEL, 'STATUS_CANCEL'),
+        );
     }
 
-    public function testRecordedErrorsAreSortedByFrequency()
+    /** @dataProvider getTypes */
+    public function testNormalRecording($type)
     {
-        $this->assertEmpty($this->storage->getErrors());
-        $this->storage->recordError($this->run1, $this->test1);
-        $this->storage->recordError($this->run1, $this->test2);
-        $this->storage->recordError($this->run1, $this->test1);
-        $this->storage->recordError($this->run1, $this->test2);
-        $this->storage->recordError($this->run2, $this->test2);
+        $this->assertEmpty($this->storage->getRecordings(array($type)));
+        $this->storage->record($this->run1, $this->test1, 1000, $type);
+        $recordings = $this->storage->getRecordings(array($type));
+        $this->assertNotEmpty($recordings);
+
+        $this->assertCount(3, $recordings[0]);
+        $this->assertArrayHasKey('class', $recordings[0]);
+        $this->assertArrayHasKey('test', $recordings[0]);
+        $this->assertArrayHasKey('time', $recordings[0]);
+
+        $recordings = $this->storage->getRecordings(array($type), false);
+        $this->assertCount(2, $recordings[0]);
+        $this->assertArrayHasKey('class', $recordings[0]);
+        $this->assertArrayHasKey('test', $recordings[0]);
+    }
+
+    /** @dataProvider getTypes */
+    public function testRecordingsAreSortedByFrequency($type)
+    {
+        $this->assertEmpty($this->storage->getRecordings(array($type)));
+        $this->storage->record($this->run1, $this->test1, 0, $type);
+        $this->storage->record($this->run1, $this->test2, 0, $type);
+        $this->storage->record($this->run1, $this->test1, 0, $type);
+        $this->storage->record($this->run1, $this->test2, 0, $type);
+        $this->storage->record($this->run2, $this->test2, 0, $type);
 
         $this->assertSame(
             array(
                 array('class' => 'PHPUnit\Runner\CleverAndSmart\Unit\Storage\Test', 'test' => 'testMethod2'),
                 array('class' => 'PHPUnit\Runner\CleverAndSmart\Unit\Storage\Test', 'test' => 'testMethod1'),
             ),
-            $this->storage->getErrors()
+            $this->storage->getRecordings(array($type), false)
         );
     }
 
-    public function testRecordTimings()
+    /** @dataProvider getErrorTypes */
+    public function testRecordedErrorsAreRemovedAfterFiveTimes($type)
     {
-        $this->assertEmpty($this->storage->getErrors());
-        $this->storage->recordSuccess($this->run1, $this->test1, 1);
-        $this->storage->recordSuccess($this->run2, $this->test1, 2);
-        $this->storage->recordSuccess($this->run2, $this->test2, 2);
-        $this->assertEmpty($this->storage->getErrors());
-        $this->assertSame(
-            array(
-                array('class' => 'PHPUnit\Runner\CleverAndSmart\Unit\Storage\Test', 'test' => 'testMethod2', 'time' => 2.0),
-                array('class' => 'PHPUnit\Runner\CleverAndSmart\Unit\Storage\Test', 'test' => 'testMethod1', 'time' => 1.5),
-            ),
-            $this->storage->getTimings()
-        );
-    }
+        $this->assertEmpty($this->storage->getRecordings(array($type)));
+        $this->storage->record($this->run1, $this->test1, 1, $type);
+        $this->assertNotEmpty($this->storage->getRecordings(array($type)));
 
-    public function testRecordedErrorsAreRemovedAfterFiveTimes()
-    {
-        $this->assertEmpty($this->storage->getErrors());
-        $this->storage->recordError($this->run1, $this->test1);
-        $this->assertNotEmpty($this->storage->getErrors());
-
-        $this->storage->recordSuccess($this->run1, $this->test1, 1);
-        $this->assertNotEmpty($this->storage->getErrors());
-        $this->storage->recordSuccess($this->run1, $this->test1, 2);
-        $this->assertNotEmpty($this->storage->getErrors());
-        $this->storage->recordSuccess($this->run1, $this->test1, 3);
-        $this->assertNotEmpty($this->storage->getErrors());
-        $this->storage->recordSuccess($this->run1, $this->test1, 4);
-        $this->assertNotEmpty($this->storage->getErrors());
-
-        $this->assertNotEmpty($this->storage->getTimings());
+        $this->storage->record($this->run1, $this->test1, 1, StorageInterface::STATUS_PASSED);
+        $this->assertNotEmpty($this->storage->getRecordings(array($type)));
+        $this->storage->record($this->run1, $this->test1, 2, StorageInterface::STATUS_PASSED);
+        $this->assertNotEmpty($this->storage->getRecordings(array($type)));
+        $this->storage->record($this->run1, $this->test1, 3, StorageInterface::STATUS_PASSED);
+        $this->assertNotEmpty($this->storage->getRecordings(array($type)));
+        $this->storage->record($this->run1, $this->test1, 4, StorageInterface::STATUS_PASSED);
+        $this->assertEmpty($this->storage->getRecordings(array($type)));
     }
 }

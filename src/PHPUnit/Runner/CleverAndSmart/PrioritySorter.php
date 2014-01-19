@@ -7,7 +7,9 @@ use PHPUnit_Framework_TestSuite as TestSuite;
 class PrioritySorter
 {
     const SORT_NONE = 0;
+
     const SORT_TIMING = 1;
+
     const SORT_ERROR = 2;
 
     private $errors = array();
