@@ -46,11 +46,28 @@ add the following line to your projects' composer.json `require-dev` section.
 
 ## Configuration
 To play around with it, add this to your `phpunit.xml(.dist)`
+
 ```
     <listeners>
         <listener class="PHPUnit\Runner\CleverAndSmart\TestListener">
             <arguments>
                 <object class="PHPUnit\Runner\CleverAndSmart\Storage\Sqlite3Storage"/>
+            </arguments>
+        </listener>
+    </listeners>
+```
+
+you might alter the location of the sqlite storage file, by passing a path to the Sqlite3Storage class:
+
+```
+    <listeners>
+        <listener class="PHPUnit\Runner\CleverAndSmart\TestListener">
+            <arguments>
+                <object class="PHPUnit\Runner\CleverAndSmart\Storage\Sqlite3Storage">
+                    <arguments>
+                        <string>/my/path/to/.phpunit-cas.db</string>
+                    </arguments>
+                </object>
             </arguments>
         </listener>
     </listeners>
