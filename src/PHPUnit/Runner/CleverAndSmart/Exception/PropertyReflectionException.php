@@ -12,7 +12,7 @@ class PropertyReflectionException extends BaseReflectionException
     )
     {
         return new static(
-            sprintf('Property "%s" does not exists in hierarchy %s', $propertyName, implode(' < ', $classHierarchy)),
+            sprintf('Property "%s" does not exist in hierarchy %s', $propertyName, implode(' < ', $classHierarchy)),
             null,
             $exception
         );
