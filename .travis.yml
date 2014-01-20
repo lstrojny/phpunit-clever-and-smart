@@ -6,15 +6,11 @@ php:
   - hhvm
 
 before_script:
-  - composer install --dev
+  - composer install
 
 script:
   - vendor/bin/phpunit --configuration phpunit-unit.xml.dist
   - vendor/bin/phpunit --configuration phpunit-integration.xml.dist
-
-notifications:
-  email:
-    - lstrojny@php.net
 
 matrix:
   allow_failures:
