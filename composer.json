@@ -7,7 +7,8 @@
         "ext-sqlite3": "*"
     },
     "require-dev": {
-        "symfony/process": "2.*"
+        "symfony/process": "2.*",
+        "athletic/athletic": "~0.1"
     },
     "authors": [
         {
