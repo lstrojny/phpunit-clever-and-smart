@@ -2,6 +2,7 @@
     "name": "lstrojny/phpunit-clever-and-smart",
     "description": "A clever test runner for PHPUnit",
     "license": "MIT",
+    "minimum-stability": "dev",
     "require": {
         "phpunit/phpunit": "3.*",
         "ext-sqlite3": "*"
