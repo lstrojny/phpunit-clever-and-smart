@@ -1,18 +1,28 @@
 language: php
+
 php:
   - 5.3
   - 5.4
   - 5.5
   - hhvm
 
+env:
+  - PHPUNIT_VERSION="3.7.*"
+  - PHPUNIT_VERSION="3.8.*"
+  
+matrix:
+  allow_failures:
+    - php: hhvm
+    - env: PHPUNIT_VERSION="3.8.*"
+  exclude:
+    - php: 5.3
+      env: PHPUNIT_VERSION="3.8.*"
+
 before_script:
+  - composer require phpunit/phpunit=$PHPUNIT_VERSION
   - composer install
 
 script:
   - vendor/bin/phpunit --configuration phpunit-unit.xml.dist
   - vendor/bin/phpunit --configuration phpunit-integration.xml.dist
   - vendor/bin/athletic --path tests/PHPUnit/Tests/Runner/CleverAndSmart/Benchmark --bootstrap tests/PHPUnit/Tests/Runner/CleverAndSmart/Benchmark/bootstrap.php --formatter GroupedFormatter
-
-matrix:
-  allow_failures:
-    - php: hhvm
