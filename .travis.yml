@@ -11,6 +11,7 @@ before_script:
 script:
   - vendor/bin/phpunit --configuration phpunit-unit.xml.dist
   - vendor/bin/phpunit --configuration phpunit-integration.xml.dist
+  - vendor/bin/athletic --path tests/PHPUnit/Tests/Runner/CleverAndSmart/Benchmark --bootstrap tests/PHPUnit/Tests/Runner/CleverAndSmart/Benchmark/bootstrap.php --formatter GroupedFormatter
 
 matrix:
   allow_failures:
