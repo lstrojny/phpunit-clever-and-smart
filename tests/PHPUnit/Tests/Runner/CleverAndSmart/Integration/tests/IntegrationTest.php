@@ -31,7 +31,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true);
         $this->runTests('SimpleTest', 'success', 'retry', true);
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', [5, 1]);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', array(5, 1));
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 0);
@@ -62,7 +62,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true);
         $this->runTests('SimpleTest', 'success', 'retry', true);
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', [5, 1]);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', array(5, 1));
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 0);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
@@ -93,7 +93,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true);
         $this->runTests('SimpleTest', 'success', 'retry', true);
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', [5, 1]);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', array(5, 1));
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
@@ -124,7 +124,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true, 'grp');
         $this->runTests('SimpleTest', 'success', 'retry', true, 'grp');
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', [5, 1]);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', array(5, 1));
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 0);
@@ -155,7 +155,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true, 'grp');
         $this->runTests('SimpleTest', 'success', 'retry', true, 'grp');
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', [5, 1]);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', array(5, 1));
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 0);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
@@ -186,7 +186,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SimpleTest', 'success', 'success', true, 'grp');
         $this->runTests('SimpleTest', 'success', 'retry', true, 'grp');
 
-        $this->assertTestSuitePosition('failure', 'SimpleTest', [5, 1]);
+        $this->assertTestSuitePosition('failure', 'SimpleTest', array(5, 1));
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'tests', 3);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'failures', 1);
         $this->assertTestSuiteResult('failure', 'SimpleTest', 'errors', 1);
@@ -301,7 +301,7 @@ class IntegrationTest extends TestCase
         $this->runTests('SkipTest', 'success', 'success', true, 'grp');
         $this->runTests('SkipTest', 'success', 'retry', true, 'grp');
 
-        $this->assertTestSuitePosition('skip', 'SkipTest', [1, 6]);
+        $this->assertTestSuitePosition('skip', 'SkipTest', array(1, 6));
         $this->assertTestSuiteResult('skip', 'SkipTest', 'tests', 2);
         $this->assertTestSuiteResult('skip', 'SkipTest', 'failures', 0);
         $this->assertTestSuiteResult('skip', 'SkipTest', 'errors', 0);
@@ -378,7 +378,7 @@ class IntegrationTest extends TestCase
     {
         $resultFilePath = static::getResultFilePath($runName);
 
-        $expressions = [];
+        $expressions = array();
         foreach ((array) $expectedPositions as $expectedPosition) {
             $expressions[] = sprintf(
                 '//testsuite/testsuite[%d][contains(@name, "%s")]',
