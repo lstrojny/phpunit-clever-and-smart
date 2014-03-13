@@ -4,7 +4,7 @@
     "license": "MIT",
     "minimum-stability": "dev",
     "require": {
-        "phpunit/phpunit": "3.*",
+        "phpunit/phpunit": "*",
         "ext-sqlite3": "*"
     },
     "require-dev": {
