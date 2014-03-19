@@ -129,6 +129,6 @@ class TestListener implements TestListenerInterface
 
         $this->storage->record($this->run, $this->currentTest, 0, StorageInterface::STATUS_CANCEL);
 
-        exit(255);
+        exit(1);
     }
 }
