@@ -9,6 +9,7 @@ php:
 env:
   - PHPUNIT_VERSION="3.7.*"
   - PHPUNIT_VERSION="3.8.*"
+  - PHPUNIT_VERSION="4.0.*"
   
 matrix:
   allow_failures:
