@@ -30,7 +30,6 @@ class PrioritySorter
     private function sortTestSuite(TestSuite $suite)
     {
         $tests = $suite->tests();
-        $orderedTests = new SegmentedQueue($tests);
 
         $testsOrderResult = array(static::SORT_NONE, null);
 
@@ -40,6 +39,7 @@ class PrioritySorter
             }
         }
 
+        $orderedTests = new SegmentedQueue($tests);
         foreach ($tests as $position => $test) {
             list($testOrderResult, $time) = $this->sortTest($test, $position, $orderedTests);
             if ($testsOrderResult[0] < $testOrderResult) {
