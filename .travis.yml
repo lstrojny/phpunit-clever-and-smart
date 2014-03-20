@@ -9,14 +9,18 @@ php:
 env:
   - PHPUNIT_VERSION="3.7.*"
   - PHPUNIT_VERSION="3.8.*"
+  - PHPUNIT_VERSION="4.0.*"
   
 matrix:
   allow_failures:
     - php: hhvm
     - env: PHPUNIT_VERSION="3.8.*"
+    - env: PHPUNIT_VERSION="4.0.*"
   exclude:
     - php: 5.3
       env: PHPUNIT_VERSION="3.8.*"
+    - php: 5.3
+      env: PHPUNIT_VERSION="4.0.*"
 
 before_script:
   - composer require phpunit/phpunit=$PHPUNIT_VERSION
