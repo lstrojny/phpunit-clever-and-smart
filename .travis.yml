@@ -19,8 +19,7 @@ matrix:
       env: PHPUNIT_VERSION="3.8.*"
 
 before_script:
-  - composer require phpunit/phpunit=$PHPUNIT_VERSION
-  - composer install
+  - ./.travis.install.sh
 
 script:
   - vendor/bin/phpunit --configuration phpunit-unit.xml.dist
