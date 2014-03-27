@@ -1,4 +1,4 @@
-# Clever Test Runner for PHPUnit [![Build Status](https://secure.travis-ci.org/lstrojny/phpunit-clever-and-smart.png)](http://travis-ci.org/lstrojny/phpunit-clever-and-smart)
+# Clever Test Runner for PHPUnit [![Build Status](https://secure.travis-ci.org/lstrojny/phpunit-clever-and-smart.svg)](http://travis-ci.org/lstrojny/phpunit-clever-and-smart)
 
 ## Mission
 Enable fast feedback cycles by storing test case results in a database and reorder tests on consecutive runs in the
