@@ -1,4 +1,5 @@
-# Clever Test Runner for PHPUnit [![Build Status](https://secure.travis-ci.org/lstrojny/phpunit-clever-and-smart.svg)](http://travis-ci.org/lstrojny/phpunit-clever-and-smart)
+# Clever Test Runner for PHPUnit
+[![Build Status](https://secure.travis-ci.org/lstrojny/phpunit-clever-and-smart.svg)](http://travis-ci.org/lstrojny/phpunit-clever-and-smart) [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/lstrojny/phpunit-clever-and-smart.svg)](http://isitmaintained.com/project/lstrojny/phpunit-clever-and-smart "Average time to resolve an issue") [![Percentage of issues still open](http://isitmaintained.com/badge/open/lstrojny/phpunit-clever-and-smart.svg)](http://isitmaintained.com/project/lstrojny/phpunit-clever-and-smart "Percentage of issues still open")
 
 ## Mission
 Enable fast feedback cycles by storing test case results in a database and reorder tests on consecutive runs in the
