@@ -11,6 +11,12 @@ env:
   - PHPUNIT_VERSION="3.7.*"
   - PHPUNIT_VERSION="3.8.*"
   - PHPUNIT_VERSION="4.0.*"
+  - PHPUNIT_VERSION="4.1.*"
+  - PHPUNIT_VERSION="4.2.*"
+  - PHPUNIT_VERSION="4.3.*"
+  - PHPUNIT_VERSION="4.4.*"
+  - PHPUNIT_VERSION="4.5.*"
+  - PHPUNIT_VERSION="dev-master"
   
 matrix:
   allow_failures:
