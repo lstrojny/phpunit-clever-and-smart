@@ -32,7 +32,6 @@ class Sqlite3Storage implements StorageInterface
         $this->query('PRAGMA foreign_keys = ON');
         $this->query('PRAGMA page_size = 4096');
         $this->query('PRAGMA cache_size = 10000');
-        $this->query('PRAGMA locking_mode = EXCLUSIVE');
         $this->query('PRAGMA synchronous = OFF');
         $this->query('PRAGMA journal_mode = MEMORY');
 
