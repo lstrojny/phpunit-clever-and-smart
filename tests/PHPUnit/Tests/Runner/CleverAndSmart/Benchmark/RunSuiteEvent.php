@@ -7,7 +7,7 @@ use Symfony\Component\Process\Process;
 
 class RunSuiteEvent extends AthleticEvent
 {
-    private $sutRoot = 'vendor/symfony/yaml/Symfony/Component/Yaml/';
+    private $sutRoot = 'vendor/symfony/yaml/';
     private $plainConfig = 'plain-phpunit.xml';
     private $mockedConfig = 'mocked-phpunit.xml';
     private $sqliteConfig = 'sqlite-phpunit.xml';

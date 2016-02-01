@@ -2,3 +2,4 @@
 /tests/PHPUnit/Tests/Runner/CleverAndSmart/Integration/result-*.xml
 /tests/PHPUnit/Tests/Runner/CleverAndSmart/Integration/.phpunit-cas.db
 /.phpunit-cas.db
+/composer.lock
