@@ -41,14 +41,14 @@ FSFS...........................................................  63 / 280 ( 22%)
 
 add the following line to your projects' composer.json `require-dev` section.
 
-```
+```json
 "lstrojny/phpunit-clever-and-smart": "0.*"
 ```
 
 ## Configuration
 To play around with it, add this to your `phpunit.xml(.dist)`
 
-```
+```xml
     <listeners>
         <listener class="PHPUnit\Runner\CleverAndSmart\TestListener">
             <arguments>
@@ -60,7 +60,7 @@ To play around with it, add this to your `phpunit.xml(.dist)`
 
 you might alter the location of the sqlite storage file, by passing a path to the Sqlite3Storage class:
 
-```
+```xml
     <listeners>
         <listener class="PHPUnit\Runner\CleverAndSmart\TestListener">
             <arguments>
